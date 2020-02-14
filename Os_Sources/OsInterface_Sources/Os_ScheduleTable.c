@@ -8,11 +8,7 @@
 
 */
 
-#ifndef OS_RESOURCE_H_
-#define OS_RESOURCE_H_
-
-typedef VAR( uint16, TYPEDEF ) ResourceType ;
 
 
-
-#endif /* OS_RESOURCE_H_ */
+#include "..\..\Os_Headers\OsInterface_Headers\Os.h"
+#include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"

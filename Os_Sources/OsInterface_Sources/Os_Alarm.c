@@ -8,9 +8,9 @@
 
 */
 
-#ifndef OS_TASK_H_
-#define OS_TASK_H_
 
-typedef VAR( uint8, TYPEDEF ) TaskType ;
 
-#endif /* OS_TASK_H_ */
+
+
+#include "..\..\Os_Headers\OsInterface_Headers\Os.h"
+#include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"

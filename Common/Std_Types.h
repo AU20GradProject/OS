@@ -19,7 +19,7 @@ Target : ARM TIVA_C TM4C123GH6PM
 #ifndef STATUSTYPEDEFINED
 #define STATUSTYPEDEFINED
 #define E_OK 0x00u
-typedef uint8 StatusType ; 	/* OSEK compliance */
+typedef VAR( uint8, TYPEDEF) StatusType ; 	/* OSEK compliance */
 #endif
 #define E_NOT_OK 0x01u
 
@@ -33,7 +33,7 @@ typedef uint8 StatusType ; 	/* OSEK compliance */
 #define STD_OFF 0x00u
 
 /* 8.1 */
-typedef uint8 Std_ReturnType ;
+typedef VAR( uint8, TYPEDEF) Std_ReturnType ;
 
 typedef struct
 {

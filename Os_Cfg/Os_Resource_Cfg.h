@@ -8,8 +8,8 @@
 
 */
 
-#ifndef OS_RESOURCE_CFG_H_
-#define OS_RESOURCE_CFG_H_
+#ifndef OS_CFG_OS_RESOURCE_CFG_H_
+#define OS_CFG_OS_RESOURCE_CFG_H_
 
 #define RESOURCE_INTERNAL    0x11u
 
@@ -54,4 +54,4 @@
 }
 
 
-#endif /* OS_RESOURCE_CFG_H_ */
+#endif /* OS_CFG_OS_RESOURCE_CFG_H_ */

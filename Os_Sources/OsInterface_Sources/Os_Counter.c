@@ -10,13 +10,5 @@
 
 
 
-#include "Os.h"
-
-
-int main(void)
-{
-
-	return 0;
-
-
-}
+#include "..\..\Os_Headers\OsInterface_Headers\Os.h"
+#include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"

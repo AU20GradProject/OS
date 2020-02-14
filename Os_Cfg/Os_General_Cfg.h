@@ -1,21 +1,16 @@
 /*
+ * Os_General_Cfg.h
+ *
+ *  Created on: Feb 13, 2020
+ *      Author: ME
+ */
 
-    Written by : Bebo
-    DATE : 7/2/2019
-    AUTOSAR Version : 4.3.1
-    DOC Name : AUTOSAR_SWS_OS.pdf
-    Target : ARM TIVA_C TM4C123GH6PM
-
-*/
-
-#ifndef OS_OS_CFG_H_
-#define OS_OS_CFG_H_
-
+#ifndef OS_CFG_OS_GENERAL_CFG_H_
+#define OS_CFG_OS_GENERAL_CFG_H_
 
 
 /************************************************************************************************/
 
-/************************************************************************************************/
 
 /* Os */
 /* 10.2.20 */
@@ -23,16 +18,20 @@
 /* OsHooks */
 /* 10.2.16 */
 
-#define SC1     0x00u
-#define SC2     0x01u
-#define SC3     0x02u
-#define SC4     0x03u
+#define OS_SC1     0x00u
+#define OS_SC2     0x01u
+#define OS_SC3     0x02u
+#define OS_SC4     0x03u
 
 
 #define OS_STANDARD    0x55u
 #define OS_EXTENDED    0xAAu
 
 
+/* list appmodes defined by user in configuration tool */
+#define OSAPPMPDE_1         0X02u
+
+/* used to define OS object */
 #define OS_OS_OBJECT_CONGIFURATION \
 { \
 \
@@ -58,7 +57,7 @@
  ,\
  .OsNumberOfCores = 0x01u\
  ,\
- .OsScalabilityClass = SC1\
+ .OsScalabilityClass = OS_SC1\
  ,\
  .OsStatus = OS_EXTENDED\
 \
@@ -70,6 +69,4 @@
 /************************************************************************************************/
 
 
-/************************************************************************************************/
-
-#endif /* OS_OS_CFG_H_ */
+#endif /* OS_CFG_OS_GENERAL_CFG_H_ */

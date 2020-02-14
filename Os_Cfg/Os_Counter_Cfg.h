@@ -9,8 +9,8 @@
 */
 
 
-#ifndef OS_COUNTER_CFG_H_
-#define OS_COUNTER_CFG_H_
+#ifndef OS_CFG_OS_COUNTER_CFG_H_
+#define OS_CFG_OS_COUNTER_CFG_H_
 
 
 #define COUNTERS_NUMBER 2
@@ -49,4 +49,4 @@
 
 
 
-#endif /* OS_COUNTER_CFG_H_ */
+#endif /* OS_CFG_OS_COUNTER_CFG_H_ */

@@ -8,8 +8,8 @@
 
 */
 
-#ifndef OS_EVENT_CFG_H_
-#define OS_EVENT_CFG_H_
+#ifndef OS_CFG_OS_EVENT_CFG_H_
+#define OS_CFG_OS_EVENT_CFG_H_
 
 
 #define EVENTS_NUMBER   4
@@ -37,4 +37,4 @@
     OS_EVENT_MASK_4\
 }
 
-#endif /* OS_EVENT_CFG_H_ */
+#endif /* OS_CFG_OS_EVENT_CFG_H_ */

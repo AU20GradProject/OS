@@ -10,8 +10,8 @@
 
 
 
-#ifndef OS_ALARM_CFG_H_
-#define OS_ALARM_CFG_H_
+#ifndef OS_CFG_OS_ALARM_CFG_H_
+#define OS_CFG_OS_ALARM_CFG_H_
 
 
 #define ALARM_ABSOLUTE  0x55u
@@ -30,4 +30,4 @@
 }
 
 
-#endif /* OS_ALARM_CFG_H_ */
+#endif /* OS_CFG_OS_ALARM_CFG_H_ */

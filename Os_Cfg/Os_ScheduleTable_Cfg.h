@@ -1,0 +1,49 @@
+/*
+
+    Written by : Bebo
+    DATE : 7/2/2019
+    AUTOSAR Version : 4.3.1
+    DOC Name : AUTOSAR_SWS_OS.pdf
+    Target : ARM TIVA_C TM4C123GH6PM
+
+*/
+#ifndef OS_CFG_OS_SCHEDULETABLE_CFG_H_
+#define OS_CFG_OS_SCHEDULETABLE_CFG_H_
+
+
+#define TABLE_ABSOLUTE      0x55u
+#define TABLE_SYNCHRON      0xAAu
+
+
+
+#define TABLES_NUMBER               2
+#define TABLES_POINTS_NUMBER        6
+#define TABLES_TASKS_NUMBER         15
+#define TABLES_EVENTS_SET_NUMBER    10
+
+
+
+
+#define OS_TABLESS_OBJECT_CONGIFURATION \
+{\
+}
+
+#define OS_TABLESS_POINTS_OBJECT_CONGIFURATION \
+{\
+}
+
+#define OS_TABLESS_TASKS_OBJECT_CONGIFURATION \
+{\
+}
+
+
+#define OS_TABLESS_TASKS_SET_OBJECT_CONGIFURATION \
+{\
+}
+
+#define OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION \
+{\
+}
+
+
+#endif /* OS_CFG_OS_SCHEDULETABLE_CFG_H_ */
