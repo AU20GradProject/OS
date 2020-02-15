@@ -1,7 +1,7 @@
 /*
 
-    Written by : Bebo
-    DATE : 7/2/2019
+    Created by : Ahmad HEGAZY
+    DATE : 15/2/2019
     AUTOSAR Version : 4.3.1
     DOC Name : AUTOSAR_SWS_OS.pdf
     Target : ARM TIVA_C TM4C123GH6PM
@@ -30,6 +30,18 @@ typedef struct
 
 
 } OsIsr;
+
+
+#define NoDisableActive 0x00u
+#define DisAllIntActive 0x01u
+#define SuspendAllIntActive 0x02u
+#define SuspendOSIntActive 0x03u
+
+/* enum contains the called interrupt disable function */
+typedef VAR( uint8, TYPEDEF ) ActiveIsrDisableType;
+
+/* Variable contains the called interrupt disable function, if no function is called default value is NoDisableActive*/
+VAR(ActiveIsrDisableType, AUTOMATIC) ActiveIsrDisable = NoDisableActive;
 
 /*******************************************************************/
 
