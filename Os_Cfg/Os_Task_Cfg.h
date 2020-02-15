@@ -21,6 +21,23 @@
 
 #define TOTAL_TASKS_RESOURCES_NUMBER    2
 
+
+/* number of priorities allowed for tasks 0~7 */
+#define TASK_PRIORITIES_NUMBER 8
+
+/* number of tasks allowed to have same priority + 1*/
+#define TASKS_PER_PRIORITY 33
+
+/* stack size of every task in number of words */
+#define TASK_STACK_SIZE 32
+
+/* number of tasks not in suspended state */
+#define TASK_PCBS_NUMBER 75
+
+/* maximum number of tasks suspended or not allowed in the system */
+#define MAX_TASKS_NUMBER    255
+
+
 /**************************************************************************/
 
 #define OS_TASKS_RESOURCES_OBJECT_CONGIFURATION \
@@ -81,6 +98,12 @@
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
        }\
+}
+
+
+#define TASKS_PCB_INDEX_ARRAY_CONFIGURATION \
+{\
+    VAL_2(0xFFu)\
 }
 
 #endif /* OS_CFG_OS_TASK_CFG_H_ */
