@@ -41,7 +41,7 @@ typedef struct
 typedef VAR( uint8, TYPEDEF ) ActiveIsrDisableType;
 
 /* Variable contains the called interrupt disable function, if no function is called default value is NoDisableActive*/
-VAR(ActiveIsrDisableType, AUTOMATIC) ActiveIsrDisable/* = NoDisableActive*/;
+VAR(ActiveIsrDisableType, AUTOMATIC) ActiveIsrDisable;
 
 /*******************************************************************/
 
