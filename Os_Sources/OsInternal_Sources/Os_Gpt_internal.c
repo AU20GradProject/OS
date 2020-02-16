@@ -11,7 +11,6 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
-#include "shit.h"
 
 
 
@@ -61,7 +60,6 @@ FUNC(StatusType, OSCODE_Internal) Init_Systick(void){
 
 void SysTick_Handler(void){
 
-    LED_G ^= (1<<3) ;
 }
 
 #endif /* OS_SOURCES_OSINTERNAL_SOURCES_OS_GPT_INTERNAL_C_ */
