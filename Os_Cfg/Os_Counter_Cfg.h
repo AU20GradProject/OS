@@ -27,26 +27,38 @@
 #define OS_COUNTERS_OBJECT_CONGIFURATION \
 {\
     {\
-    .OsCounterType = COUNTER_HARDWARE \
+    .OsCounterType = COUNTER_SOFTWARE \
     ,\
-    .OsCounterTicksPerBase = 100u \
+    .OsCounterTicksPerBase = 1u \
     ,\
     .OsCounterMaxAllowedValue = 1000u \
     ,\
-    .OsCounterMinCycle = 20u \
+    .OsCounterMinCycle = 10u \
     }\
     ,\
     {\
     .OsCounterType = COUNTER_SOFTWARE \
     ,\
-    .OsCounterTicksPerBase = 200u \
+    .OsCounterTicksPerBase = 1u \
     ,\
-    .OsCounterMaxAllowedValue = 4000u \
+    .OsCounterMaxAllowedValue = 1000u \
     ,\
-    .OsCounterMinCycle = 50u \
+    .OsCounterMinCycle = 0u \
     }\
 }
 
-
-
+#define OS_COUNTERS_INTERNAL_OBJECT \
+{\
+    {\
+    .OsCounterVal = 0u \
+    ,\
+    .OsCounterTicksValue = 0u\
+    }\
+    ,\
+    {\
+    .OsCounterVal = 0u \
+    ,\
+    .OsCounterTicksValue = 0u\
+    }\
+}
 #endif /* OS_CFG_OS_COUNTER_CFG_H_ */

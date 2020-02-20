@@ -25,6 +25,10 @@ typedef struct
 
 } OsAlarmSetEvent ;
 
+/*
+    Internal Function to check alarms waiting on Counter ID value for expiring by searching for alarms with CounterID
+    and checking the tick value for expiry with OsCounterInternal OsCounterVal
+*/
 
 /***************************************************************/
 
@@ -42,7 +46,17 @@ typedef union
 
     VAR( OsAlarmSetEvent, AUTOMATIC )   AlarmEvent ;
 
-} OsAlarmAction ;
+} OsAlarmActions ;
+
+typedef struct{
+
+    /* Enum holds ID for action taken on alarm expiry */
+    VAR (uint8, AUTOMATIC) ActionType; /* Actions*/
+
+    /* Action to be executed on alarm expiry */
+    VAR (OsAlarmActions, AUTOMATIC) Action;
+
+} OsAlarmAction;
 
 /***************************************************************/
 
@@ -54,7 +68,7 @@ typedef struct
     VAR( uint8, AUTOMATIC ) OsAlarmAppModeRef ;
 
     /* specifies the type of autostart for the alarm absolute or alarm */
-    VAR( AppModeType, AUTOMATIC ) OsAlarmAutostartType ;
+    VAR( uint8, AUTOMATIC ) OsAlarmAutostartType ;
 
     /* relative or absolute tick value when the alarm expires for the first time.
      * for an alarm which is RELATIVE the value must be at bigger than 0 */
@@ -64,24 +78,41 @@ typedef struct
     VAR( TickType, AUTOMATIC ) OsAlarmCycleTime ;
 
 } OsAlarmAutostart ;
+
 /***************************************************************/
 
 typedef struct
 {
-
 
     /* Reference to the assigned counter for that alarm */
     VAR( CounterType, AUTOMATIC ) OsAlarmCounterRef ;
 
     VAR (OsAlarmAction, AUTOMATIC ) AlarmAction ;
 
-    VAR (OsAlarmAutostart, AUTOMATIC ) AlarmAutotart ;
+    VAR (OsAlarmAutostart, AUTOMATIC ) AlarmAutostart ;
 
 } OsAlarm ;
 
+/**************************************************************/
+
+typedef struct
+{
+    /* Holds the value the Software/Hardware Counter will expire at
+       either is ABSOLUTE or RELATIVE which is added to the current counter value
+       then stored here
+    */
+    VAR ( TickType, AUTOMATIC ) AlarmExpiryTickValue;
+
+    /* Holds Cycle value (FINISHED,ONE_SHOT,CYCLIC) */
+    VAR ( TickType, AUTOMATIC ) Cycle; /* 0 if not cyclic */
+
+    VAR ( uint8 , AUTOMATIC ) InUse;
+
+} OsAlarmInternal ;
 
 /***************************************************************/
 
+FUNC(void, OS_INTERNAL_CODE) CheckAlarmExpiry(CounterType CounterID);
 
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_ALARM_INTERNAL_H_ */

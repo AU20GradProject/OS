@@ -13,4 +13,18 @@
 
 typedef VAR( uint8, TYPEDEF ) CounterType ;
 
+
+typedef VAR( uint32, TYPEDEF ) TickType ;
+
+typedef P2VAR(TickType, TYPEDEF, VAR) TickRefType;
+
+
+
+FUNC( StatusType, OS_CODE) IncrementCounter( CounterType CounterID );
+
+FUNC( StatusType, OS_CODE) GetCounterValue( CounterType CounterID, TickRefType Value );
+
+FUNC( StatusType, OS_CODE) GetElapsedValue( CounterType CounterID, TickRefType Value, TickRefType ElapsedValue );
+
+
 #endif /* OS_HEADERS_OSINTERFACE_HEADERS_OS_COUNTER_H_ */

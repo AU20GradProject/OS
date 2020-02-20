@@ -33,7 +33,19 @@ typedef struct
 } OsCounter ;
 
 /*******************************************************************/
+typedef struct
+{
+    /* Contains the current value of the counter  */
+    VAR( TickType , AUTOMATIC ) OsCounterVal;
 
+    /* Incremented at each system tick until it reaches OsCounterTicksPerBase value this OsCounter Value is Incremented */
+    VAR( TickType , AUTOMATIC ) OsCounterTicksValue;
+
+} OsCounterInternal;
+
+typedef P2VAR(OsCounterInternal, TYPDEF,TYPDEF)   OsCounterRefInternal;
+
+typedef P2CONST(OsCounter, TYPEDEF,TYPEDEF)   OsCounterRef;
 
 
 #endif /* OS_COUNTER_INTERNAL_H_ */
