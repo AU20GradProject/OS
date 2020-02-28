@@ -116,6 +116,7 @@ extern CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] ;
 /* used to hold resource id of last resource occupied by isr */
 extern VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] ;
 
+/* list of resources accessed by every task */
 extern CONST( ResourceType, OS_CONFIG_DATA ) OsIsrsResources_Array [ TOTAL_ISRS_RESOURCES_NUMBER ] ;
 
 
