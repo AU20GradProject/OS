@@ -31,7 +31,7 @@
     ,\
     .OsCounterTicksPerBase = 1u \
     ,\
-    .OsCounterMaxAllowedValue = 1000u \
+    .OsCounterMaxAllowedValue = 90000u \
     ,\
     .OsCounterMinCycle = 10u \
     }\
@@ -47,18 +47,4 @@
     }\
 }
 
-#define OS_COUNTERS_INTERNAL_OBJECT \
-{\
-    {\
-    .OsCounterVal = 0u \
-    ,\
-    .OsCounterTicksValue = 0u\
-    }\
-    ,\
-    {\
-    .OsCounterVal = 0u \
-    ,\
-    .OsCounterTicksValue = 0u\
-    }\
-}
 #endif /* OS_CFG_OS_COUNTER_CFG_H_ */

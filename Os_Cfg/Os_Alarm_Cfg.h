@@ -47,19 +47,6 @@
     .AlarmAction = \
         {\
             .ActionType = ALARM_ACTION_CALLBACK \
-            ,\
-            .Action.OsAlarmCallbackName =  ToggleGreenLed\
-        }\
-    ,\
-    .AlarmAutostart = \
-        {\
-            .OsAlarmAppModeRef = AUTOSTART \
-            ,\
-            .OsAlarmAlarmTime = 999\
-            ,\
-            .OsAlarmCycleTime = 100\
-            ,\
-            .OsAlarmAutostartType = ALARM_ABSOLUTE\
         }\
     }\
 }

@@ -33,4 +33,73 @@ typedef VAR( uint8, TYPEDEF ) TaskStateType ;
 typedef P2VAR( TaskStateType, TYPEDEF, TYPEDEF ) TaskStateRefType ;
 
 
+
+
+/*****************************************************************************/
+
+/* task <TaskID> is transferred from the suspended state into the ready state
+ * Rescheduling after the call to ActivateTask depends on the place it is called from (ISR, non preemptable task, preemptable task)
+ * When an extended task is transferred from suspended state into ready state all its events are cleared
+ * No error, E_OK
+ * Too many task activations of <TaskID>, E_OS_LIMIT
+ * Task <TaskID> is invalid, E_OS_ID */
+
+StatusType ActivateTask ( TaskType TaskID ) ;
+
+/*****************************************************************************/
+
+/* service causes the termination of the calling task. The calling task is transferred from the running state into the suspended state
+ * internal resource assigned to the calling task is automatically released
+ * Other resources occupied by the task shall have been released before the call to TerminateTask
+ * TerminateTask is called successfully, it enforces a rescheduling.
+ * Task still occupies resources, E_OS_RESOURCE
+ * Call at interrupt level, E_OS_CALLEVEL */
+
+StatusType TerminateTask ( void ) ;
+
+/*****************************************************************************/
+
+
+StatusType ChainTask ( TaskType TaskID ) ;
+
+/*****************************************************************************/
+
+
+/* service has no influence on tasks with no internal resource assigned (preemptable tasks). */
+/* Call at interrupt level, E_OS_CALLEVEL .*/
+/* if calling task has an internal resource Schedule enables a processor assignment to other tasks
+ * with lower or equal priority than the ceiling priority of the internal resource and
+ * higher priority than the priority of the calling task */
+/* when call internal resource is released and context switching happen to highest priority task */
+
+StatusType Schedule ( void ) ;
+
+/*****************************************************************************/
+
+
+/* GetTaskID returns the information about the TaskID of the task which is currently running */
+/* If <TaskID> can’t be evaluated (no task currently running), the service returns INVALID_TASK as TaskType */
+
+StatusType GetTaskID ( TaskRefType TaskID ) ;
+
+/*****************************************************************************/
+
+/* Returns the state of a task (running, ready, waiting, suspended) at the time of calling GetTaskState */
+/* When a call is made from a task in a full preemptive system, the result may already be incorrect at the time of evaluation */
+/* Task <TaskID> is invalid, E_OS_ID */
+
+StatusType GetTaskState ( TaskType TaskID, TaskStateRefType State ) ;
+
+/*****************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
 #endif /* OS_HEADERS_OSINTERFACE_HEADERS_OS_TASK_H_ */

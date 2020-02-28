@@ -58,8 +58,6 @@ FUNC(StatusType, OSCODE_Internal) Init_Systick(void){
     return retVal;
 }
 
-void SysTick_Handler(void){
 
-}
 
 #endif /* OS_SOURCES_OSINTERNAL_SOURCES_OS_GPT_INTERNAL_C_ */
