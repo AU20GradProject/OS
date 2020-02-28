@@ -12,6 +12,10 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
+#include "../../../shit.h"
+extern CONST( OsCounter, OS_CONFIG_DATA ) OsCounter_Array [ COUNTERS_NUMBER ];
+
+extern VAR( OsCounterInternal, OS_DATA)   OsCounterInternal_Array [COUNTERS_NUMBER ];
 
 /*
    - Synchronous may cause rescheduling ,reentrant, Service ID: 0x0f
@@ -70,7 +74,6 @@ FUNC( StatusType, OS_CODE) IncrementCounter( CounterType CounterID ){
 
             }
             CheckAlarmExpiry(CounterID);
-            CheckScheduleTablesExpiry(CounterID);
         }
     }
 
@@ -153,6 +156,7 @@ FUNC(void, ISR_CODE) SysTick_Handler(void)
 {
 
     uint8 i;
+//    LED_R ^= 2;
     for(i = 0; i < COUNTERS_NUMBER; i++)
     {
 

@@ -89,6 +89,8 @@ typedef struct
 
     VAR (OsAlarmAction, AUTOMATIC ) AlarmAction ;
 
+    VAR (OsAlarmAutostart, AUTOMATIC ) AlarmAutostart ;
+
 } OsAlarm ;
 
 /**************************************************************/

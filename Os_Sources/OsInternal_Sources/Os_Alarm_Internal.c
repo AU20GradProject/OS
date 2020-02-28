@@ -13,6 +13,15 @@
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
 
+extern void ToggleGreenLed(void);
+
+CONST( OsAlarm, OS_CONFIG_DATA ) OsAlarm_Array [ ALARMS_NUMBER ] = OS_ALARMS_OBJECT_CONGIFURATION ;
+
+
+extern VAR( OsCounterInternal, OS_DATA)   OsCounterInternal_Array [COUNTERS_NUMBER ];
+
+/* Controlled by Os Alarm API */
+VAR( OsAlarmInternal, OS_CONFIG_DATA ) OsAlarmInternal_Array [ALARMS_NUMBER] = OS_ALARMS_INTERNAL_OBJECT_CONFIGURATION ;
 
 FUNC(void, OS_INTERNAL_CODE) CheckAlarmExpiry(CounterType CounterID){
 
@@ -28,7 +37,7 @@ FUNC(void, OS_INTERNAL_CODE) CheckAlarmExpiry(CounterType CounterID){
 
             case ALARM_ACTION_ACT_TASK:
 
-                ActivateTask(OsAlarm_Array[i].AlarmAction.Action.OsAlarmActivateTaskRef);
+                //ActivateTask(OsAlarm_Array[i].AlarmAction.Action.OsAlarmActivateTaskRef);
 
                 break;
             case ALARM_ACTION_CALLBACK:
@@ -40,7 +49,7 @@ FUNC(void, OS_INTERNAL_CODE) CheckAlarmExpiry(CounterType CounterID){
                 break;
 
             case ALARM_ACTION_SET_EVENT:
-                SetEvent(OsAlarm_Array[i].AlarmAction.Action.AlarmEvent.OsAlarmSetEventTaskRef,OsAlarm_Array[i].AlarmAction.Action.AlarmEvent.OsAlarmSetEventRef);
+                //SetEvent(OsAlarm_Array[i].AlarmAction.Action.AlarmEvent);
                 break;
 
             case ALARM_NOFUNC:
@@ -59,3 +68,25 @@ FUNC(void, OS_INTERNAL_CODE) CheckAlarmExpiry(CounterType CounterID){
 }
 
 
+FUNC(void, OS_CODE_INTERNAL) AlarmAutoStart(){
+
+    VAR(uint8, AUTOMATIC) i;
+
+    for(i = 0 ; i < ALARMS_NUMBER; i++){
+
+        if( OsAlarm_Array[i].AlarmAutostart.OsAlarmAppModeRef == AUTOSTART ){
+
+            if(OsAlarm_Array[i].AlarmAutostart.OsAlarmAutostartType == ALARM_ABSOLUTE ){
+
+                SetAbsAlarm(i,OsAlarm_Array[i].AlarmAutostart.OsAlarmAlarmTime,OsAlarm_Array[i].AlarmAutostart.OsAlarmCycleTime);
+
+            }else if(OsAlarm_Array[i].AlarmAutostart.OsAlarmAutostartType == ALARM_RELATIVE){
+
+                SetRelAlarm(i,OsAlarm_Array[i].AlarmAutostart.OsAlarmAlarmTime,OsAlarm_Array[i].AlarmAutostart.OsAlarmCycleTime);
+
+            }
+        }
+
+    }
+
+}

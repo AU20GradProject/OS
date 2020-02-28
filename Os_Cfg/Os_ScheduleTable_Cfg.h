@@ -14,62 +14,35 @@
 #define TABLE_ABSOLUTE      0x55u
 #define TABLE_SYNCHRON      0xAAu
 
-#define IMPLICIT        0u
-#define EXPLICIT        1u
 
 
-#define TABLES_NUMBER               1
-#define TABLES_POINTS_NUMBER        2
-#define TABLES_TASKS_NUMBER         2
-#define TABLES_EVENTS_SET_NUMBER    2
+#define TABLES_NUMBER               2
+#define TABLES_POINTS_NUMBER        6
+#define TABLES_TASKS_NUMBER         15
+#define TABLES_EVENTS_SET_NUMBER    10
 
 
-#define EMPTY_NEXT_TABLE            -1
+
 
 #define OS_TABLESS_OBJECT_CONGIFURATION \
 {\
-    {\
-        .OsScheduleTableRepeating = TRUE,\
-        .OsScheduleTableCounterRef = COUNTER_1,\
-        .ExpiryPointsNumber = 2,\
-        .FirstExpiryPoint = 0,\
-        .OsScheduleTableDuration = 2000u,\
-        .OsScheduleTblSyncStrategy = EXPLICIT,\
-    }\
 }
 
 #define OS_TABLESS_POINTS_OBJECT_CONGIFURATION \
 {\
-        {\
-            .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = 1,\
-            .PointEvents = 1,\
-            .OsScheduleTblAdjustableExpPoint = 0,\
-        },\
-        {\
-            .OsScheduleTblExpPointOffset = 1500,\
-            .PointTasks = 1,\
-            .PointEvents = 1,\
-            .OsScheduleTblAdjustableExpPoint = 0,\
-        }\
 }
-/* contains id for tasks to be activated by the schedule table's points */
+
 #define OS_TABLESS_TASKS_OBJECT_CONGIFURATION \
 {\
-    0,1\
 }
 
 
 #define OS_TABLESS_TASKS_SET_OBJECT_CONGIFURATION \
 {\
-    0,\
-    1\
 }
 
 #define OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION \
 {\
-    0xFFFFFFF,\
-    0x00000000\
 }
 
 

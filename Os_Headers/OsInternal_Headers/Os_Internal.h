@@ -20,8 +20,5 @@
 #include "Os_Alarm_Internal.h"
 #include "Os_ScheduleTable_Internal.h"
 #include "Os_Gpt_Internal.h"
-#include "Os_ExternalVariables.h"
-
-
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_INTERNAL_H_ */

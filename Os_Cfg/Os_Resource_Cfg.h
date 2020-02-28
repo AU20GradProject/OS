@@ -18,25 +18,17 @@
 #define RESOURCE_STANDARD    0x44u
 
 
-#define RESORCE_0   0
+#define RESORCE_1   0
 
-#define RESORCE_1   1
+#define RESORCE_2   1
 
-#define RESORCE_2   2
-
-#define RESORCE_3   3
-
-#define RESORCE_4   4
-
-#define RESORCE_5   5
+#define RESORCE_3   2
 
 
 
+#define NO_RESOURCE 0x00
 
-
-#define NO_RESOURCE         0xFFu
-
-#define RESOURCES_NUMBER    6
+#define RESOURCES_NUMBER 3
 
 
 
@@ -46,54 +38,20 @@
         .OsResourceProperty = RESOURCE_INTERNAL \
         ,\
         .OsResourceLinkedResourceRef = NO_RESOURCE\
-        ,\
-        .OsResourcePriority = 0x04u \
     }\
     ,\
     {\
         .OsResourceProperty =  RESOURCE_STANDARD  \
         ,\
         .OsResourceLinkedResourceRef = NO_RESOURCE \
-        ,\
-        .OsResourcePriority = 0x08u \
-    }\
-    ,\
-    {\
-        .OsResourceProperty =  RESOURCE_STANDARD  \
-        ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
-        ,\
-        .OsResourcePriority = 0x07u \
-    }\
-    ,\
-    {\
-        .OsResourceProperty =  RESOURCE_STANDARD  \
-        ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
-        ,\
-        .OsResourcePriority = 0x06u \
-    }\
-    ,\
-    {\
-        .OsResourceProperty =  RESOURCE_STANDARD  \
-        ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
-        ,\
-        .OsResourcePriority = 0x05u \
     }\
     ,\
     {\
         .OsResourceProperty = RESOURCE_LINKED \
         ,\
-        .OsResourceLinkedResourceRef = RESORCE_5 \
-        ,\
-        .OsResourcePriority = 0x05u \
+        .OsResourceLinkedResourceRef = RESORCE_1 \
     }\
 }
 
-
-#define OS_RESOURCES_PCB_OBJECT_CONGIFURATION \
-{\
-}
 
 #endif /* OS_CFG_OS_RESOURCE_CFG_H_ */

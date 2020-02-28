@@ -11,8 +11,8 @@
 #ifndef OS_HEADERS_OSINTERFACE_HEADERS_OS_H_
 #define OS_HEADERS_OSINTERFACE_HEADERS_OS_H_
 
-#include "..\..\Common\Std_Types.h"
-#include "Os_MemMap.h"
+#include "..\..\..\Common\Std_Types.h"
+#include "..\..\Os_MemMap.h"
 
 #include "..\..\Os_Cfg\Os_Cfg.h"
 

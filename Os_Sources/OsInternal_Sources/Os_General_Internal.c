@@ -13,4 +13,9 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
-#include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
+
+/* used for define OS object in the system */
+CONST( OsOS, OS_CONFIG_DATA ) OS = OS_OS_OBJECT_CONGIFURATION ;
+
+/* used to save app mode used inside system and passed to StartOS service */
+VAR( AppModeType, OS_CONFIG_DATA )  AppMode ;
