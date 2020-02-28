@@ -13,7 +13,7 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
-
+#include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
 
 /* list of resources accessed by every task */
 CONST( ResourceType, OS_CONFIG_DATA ) OsIsrsResources_Array [ TOTAL_ISRS_RESOURCES_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;

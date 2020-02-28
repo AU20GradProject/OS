@@ -14,6 +14,7 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
+#include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
 
 /* This service returns the identifier of the currently executing ISR.*/
 FUNC(ISRType, AUTOMATIC) GetISRID( void ){
