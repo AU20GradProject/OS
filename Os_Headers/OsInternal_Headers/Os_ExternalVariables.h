@@ -106,7 +106,8 @@ extern VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 /**************************************************************************/
 
 
-/* used to carry ISR_ID of current runnign ISR */
+/* used to carry ISR_ID of current runnign ISR, set at the beginning of the ISR
+    if no ISR is active, INVALID_ISR is the default value. */
 extern VAR( ISRType, OS_VAR_CLEARED ) IsrID ;
 
 

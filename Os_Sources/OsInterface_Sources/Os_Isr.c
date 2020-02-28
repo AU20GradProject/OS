@@ -19,10 +19,10 @@
 /* This service returns the identifier of the currently executing ISR.*/
 FUNC(ISRType, AUTOMATIC) GetISRID( void ){
     /*
-    [SWS_Os_00263] ⌈If called from category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return the identifier of the currently executing ISR.
-    [SWS_Os_00264] ⌈If its caller is not a category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return INVALID_ISR. ⌋ ( )
+    [SWS_Os_00263] If called from category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return the identifier of the currently executing ISR.
+    [SWS_Os_00264] If its caller is not a category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return INVALID_ISR.
    */
-    return ActiveISR;
+    return IsrID;
 }
 
 /*This service restores the state saved by DisableAllInterrupts.*/

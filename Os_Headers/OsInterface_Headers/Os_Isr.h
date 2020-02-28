@@ -130,10 +130,6 @@
 /* enum data type identifies an interrupt service routine (ISR). */
 typedef VAR( uint8, TYPEDEF ) ISRType ;
 
-/* Variable contains active ISR ID, set at the beginning of the ISR
-    if no ISR is active, INVALID_ISR is the default value. */
-VAR(ISRType, AUTOMATIC) ActiveISR;
-
 /*
     Within the application, an interrupt service routine of category 2 is defined according to the following pattern:
     ISR (FuncName)
