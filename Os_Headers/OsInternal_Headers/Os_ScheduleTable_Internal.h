@@ -18,7 +18,6 @@
 
 typedef struct
 {
-
     /* specifies the type of the autostart for the schedule table */
     VAR( uint8, AUTOMATIC ) OsScheduleTableAutostartType ;
 
@@ -42,10 +41,10 @@ typedef struct
     VAR( uint16, AUTOMATIC ) EventSetNumber ;
 
     /* pointer to first event to set in the point */
-    P2VAR( uint16, AUTOMATIC, AUTOMATIC ) FirtsEventSet ;
+    P2VAR( uint16, AUTOMATIC, AUTOMATIC ) FirstEventSet ;
 
     /*index of first first task to set its event in the point */
-    VAR( uint16, AUTOMATIC ) FirtsEventSetTask_Ptr ;
+    VAR( uint16, AUTOMATIC ) FirstEventSetTask_Ptr ;
 
 } OsScheduleTableEventSetting ;
 
@@ -56,8 +55,7 @@ typedef struct
     VAR( uint16, AUTOMATIC ) TaskActivationNumber ;
 
     /* index of first first task activation in the point */
-    VAR( uint16, AUTOMATIC ) FirtsTaskActivation ;
-
+    VAR( uint16, AUTOMATIC ) FirstTaskActivation ;
 
 
 } OsScheduleTableTaskActivation ;
@@ -77,11 +75,11 @@ typedef struct
 typedef struct
 {
 
-    /* define tasks will be activated in this point expiration */
-    VAR( OsScheduleTableTaskActivation, AUTOMATIC ) PointTasks;
-
     /* offset from zero (in ticks) at which the expiry point is to be processed */
     VAR( TickType, AUTOMATIC )  OsScheduleTblExpPointOffset ;
+
+    /* define tasks will be activated in this point expiration */
+    VAR( OsScheduleTableTaskActivation, AUTOMATIC ) PointTasks;
 
     /* define events will be set in this point expiration */
     VAR( OsScheduleTableEventSetting, AUTOMATIC ) PointEvents ;
@@ -107,16 +105,37 @@ typedef struct
     VAR( uint16, AUTOMATIC ) ExpiryPointsNumber ;
 
     /* index of first expiry point in the table in expiry points list */
-    VAR( uint16, AUTOMATIC ) FirtsExpiryPoint ;
+    VAR( uint16, AUTOMATIC ) FirstExpiryPoint ;
 
     /* defines the modulus of the schedule table (in ticks). */
     VAR( TickType, AUTOMATIC ) OsScheduleTableDuration ;
 
-    VAR( OsScheduleTableAutostart, AUTOMATIC ) Autostart  ;
+    /*
+         IMPLICIT: synchronization, EXPLICIT: no synchronization
+     */
+    VAR(boolean, AUTOMATIC ) OsScheduleTblSyncStrategy ;
 
 } OsScheduleTable ;
 
+typedef struct{
+
+    /* Last accessed expiry point */
+    VAR( uint16, AUTOMATIC ) CurrentExpiryPointIndex;
+
+    /* Schedule table current state */
+    VAR( uint8, AUTOMATIC ) CurrentState;
+
+    /* Offset to start from current counter */
+    VAR( TickType, AUTOMATIC ) StartCounterVal;
+
+    /* Next schedule ID if there is */
+    VAR ( sint16 , AUTOMATIC ) NextScheduleTable;
+
+} OsScheduleTableInternal ;
 /***********************************************************************************************************************/
 
 
+FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) ;
+
+//FUNC(StatusType, OS_INTERNAL_CODE) CheckCounter
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_SCHEDULETABLE_INTERNAL_H_ */

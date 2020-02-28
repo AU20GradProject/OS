@@ -30,5 +30,13 @@ typedef P2VAR( ScheduleTableStatusType, TYPEDEF, TYPEDEF ) ScheduleTableStatusRe
 
 /*********************************************************************************************************/
 
+FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTableID, TickType Offset );
 
+FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTableID, TickType Start );
+
+FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID );
+
+FUNC( StatusType, OS_CODE ) NextScheduleTable( ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To );
+
+FUNC( StatusType, OS_CODE ) GetScheduleTableStatus( ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus );
 #endif /* OS_HEADERS_OSINTERFACE_HEADERS_OS_SCHEDULETABLE_H_ */

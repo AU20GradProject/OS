@@ -33,5 +33,17 @@ typedef struct
 
 /*******************************************************************/
 
+/* used to determine setting of applications modes and task & alarm which activated in AutoStart */
+typedef struct
+{
+    VAR( uint16, AUTOMATIC )     AutoStartTasks_Number ;                /* determine number of tasks to be activated  */
+    VAR( uint16, AUTOMATIC )     AutoStartTasks_Index ;                 /* determine index of first task to be activated in */
+    VAR( uint16, AUTOMATIC )     AutoStartAlarms_Number ;               /* determine number of alarms to be activated */
+    VAR( uint16, AUTOMATIC )     AutoStartAlarms_Index ;                /* determine index of first alarm to be activated in */
+    VAR( uint16, AUTOMATIC )     AutoStartScheduleTables_Number ;       /* determine number of ScheduleTables to be activated */
+    VAR( uint16, AUTOMATIC )     AutoStartScheduleTables_Index ;        /* determine index of first ScheduleTable to be activated in */
+
+}OsAppMode ;
+
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_GENERAL_INTERNAL_H_ */

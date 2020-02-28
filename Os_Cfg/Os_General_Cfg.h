@@ -27,9 +27,22 @@
 #define OS_STANDARD    0x55u
 #define OS_EXTENDED    0xAAu
 
+#define OS_MODE         OS_EXTENDED
+
+#define APPMODE_INVALID     0xFFFFu
 
 /* list appmodes defined by user in configuration tool */
 #define OSAPPMPDE_1         0X02u
+
+#define OS_APPMODES_NUMBER          2
+
+#define AUTOSTART_TASKS_NUMBER      2
+
+#define AUTOSTART_ALARMS_NUMBER     2
+
+#define AUTOSTART_TABLESS_NUMBER    2
+
+
 
 /* used to define OS object */
 #define OS_OS_OBJECT_CONGIFURATION \
@@ -64,7 +77,31 @@
 }
 
 
+#define OS_APPMODES_OBJECT_CONGIFURATION \
+{\
+}
 
+#define OS_AUTOSTART_TASKS_OBJECT_CONGIFURATION \
+{\
+}
+
+
+#define OS_AUTOSTART_ALARMS_OBJECT_CONGIFURATION \
+{\
+}
+
+
+#define OS_AUTOSTART_TABLES_OBJECT_CONGIFURATION \
+{\
+}
+
+#define OS_AUTOSTART_SETTING_ALARMS_OBJECT_CONGIFURATION \
+{\
+}
+
+#define OS_AUTOSTART_SETTING_TABLES_OBJECT_CONGIFURATION \
+{\
+}
 
 /************************************************************************************************/
 

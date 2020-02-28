@@ -13,6 +13,6 @@
 
 #include "..\..\Os_Headers\OsInterface_Headers\Os.h"
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
+#include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
 
 
-CONST( OsResource, OS_CONFIG_DATA ) OsResource_Array [ RESOURCES_NUMBER ] = OS_RESOURCES_OBJECT_CONGIFURATION ;

@@ -38,6 +38,21 @@ typedef VAR( uint8, TYPEDEF ) AppModeType ;
 /*********************************************************************************************************/
 
 
+/* service returns the current application mode. It may be used to write mode dependent code. */
+AppModeType GetActiveApplicationMode ( void ) ;
+
+
+/*********************************************************************************************************/
+
+/* The user can call this system service to start the operating system in a specific mode */
+void StartOS ( AppModeType Mode ) ;
+
+
+/*********************************************************************************************************/
+
+void ShutdownOS ( StatusType Error ) ;
+
+/*********************************************************************************************************/
 
 
 #endif /* OS_HEADERS_OSINTERFACE_HEADERS_OS_GENERAL_H_ */
