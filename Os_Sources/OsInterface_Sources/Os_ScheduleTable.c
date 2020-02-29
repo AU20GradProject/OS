@@ -40,6 +40,7 @@ FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTable
     VAR( uint16, AUTOMATIC ) i, j;
 
 
+
 #if OS_MODE == OS_STANDARD
 
     /* [SWS_Os_00452] If the schedule table <ScheduleTableID> in a call of StartScheduleTableRel() is implicitely
@@ -166,6 +167,7 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
     VAR( uint16, AUTOMATIC ) i, j;
 
     VAR( TickType, AUTOMATIC ) Offset;
+
 
 #if OS_MODE == OS_STANDARD
 
@@ -294,12 +296,14 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
 
 #endif
 
+
     return RetVal;
 }
 
 FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID ){
 
     StatusType RetVal = E_OK;
+
 
 #if OS_MODE == OS_STANDARD
 
@@ -354,7 +358,6 @@ FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID
 #endif
 
 
-
     return RetVal;
 
 }
@@ -362,7 +365,6 @@ FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID
 FUNC( StatusType, OS_CODE ) NextScheduleTable( ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To ) {
 
     StatusType RetVal = E_OK;
-
 
 #if OS_MODE == OS_STANDARD
 
@@ -462,7 +464,6 @@ FUNC( StatusType, OS_CODE ) NextScheduleTable( ScheduleTableType ScheduleTableID
 
 #endif
 
-
     return RetVal;
 
 }
@@ -471,6 +472,7 @@ FUNC( StatusType, OS_CODE ) GetScheduleTableStatus( ScheduleTableType ScheduleTa
 
     StatusType RetVal = E_OK;
 
+    CS_ON;
 #if OS_MODE == OS_STANDARD
 
     * ScheduleStatus = ScheduleTableInternal_Array[ScheduleTableID].CurrentState;
@@ -488,7 +490,7 @@ FUNC( StatusType, OS_CODE ) GetScheduleTableStatus( ScheduleTableType ScheduleTa
     }
 
 #endif
-
+    CS_OFF;
     return RetVal;
 
 }

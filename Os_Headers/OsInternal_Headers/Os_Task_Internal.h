@@ -27,17 +27,7 @@
 
 /* set pending bit of PendSv exception and set stack pointer to MSP */
 
-#define DISPATCHER_CALL  \
-                          __asm ( " MOV R10, #0x8000 " ) ; \
-                          __asm( " MOVT R10, #0x2000 " ) ; \
-                          __asm ( " MSR MSP, R10 " ) ; \
-                          __asm ( " MRS R10, CONTROL " ) ;\
-                          __asm ( " BIC R10, R10, #0x02 " ) ;\
-                          __asm ( " MSR CONTROL, R10 " ) ; \
-                          *( ( volatile P2VAR( uint32, AUTOMATIC, REGSPACE ) ) 0xE000ED04 ) |= ( 0x01u << 28 ) ;\
-                          __asm ( " MRS R10, CONTROL " ) ;\
-                          __asm ( " ORR R10, R10, #0x02 " ) ;\
-                          __asm ( " MSR CONTROL, R10 " )
+#define DISPATCHER_CALL *( ( volatile P2VAR( uint32, AUTOMATIC, REGSPACE ) ) 0xE000ED04 ) |= ( 0x01u << 28 )
 
 
 

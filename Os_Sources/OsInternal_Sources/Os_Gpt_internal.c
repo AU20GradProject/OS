@@ -17,6 +17,8 @@
 
 FUNC(StatusType, OSCODE_Internal) Init_Systick(void){
 
+    CS_ON;
+    SYS_TICK_PRIORITY;
     StatusType retVal = E_OK;
     /* Set clock source */
     if(SYSTICK_CLK_SRC == CLK_SRC_PIOSC_DIV4){
@@ -56,6 +58,7 @@ FUNC(StatusType, OSCODE_Internal) Init_Systick(void){
         Systick_STCTRL &= ~(1<<ENABLE);
 
     }
+    CS_OFF;
     return retVal;
 }
 

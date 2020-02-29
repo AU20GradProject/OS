@@ -12,6 +12,7 @@
 #define SYSTICK_ENABLE                  STD_ON
 #define SYSTICK_INT_ENABLE              STD_ON
 #define SYSTICK_CLK_SRC                 CLK_SRC_PIOSC_DIV4
+#define SYS_TICK_PRIORITY  *( ( volatile P2VAR( uint32, AUTOMATIC, REGSPACE ) ) 0xE000ED20 ) |= ( 0x01u << 29  )
 
 
 /* Register addresses */

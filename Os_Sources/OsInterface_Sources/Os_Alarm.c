@@ -39,7 +39,7 @@ extern VAR( OsCounterInternal, OS_DATA)   OsCounterInternal_Array [COUNTERS_NUMB
 FUNC(StatusType, OS_CODE) GetAlarmBase ( AlarmType AlarmID, AlarmBaseRefType Info ) {
 
     StatusType RetVal  = E_OK;
-
+    CS_ON;
     if(AlarmID > ALARMS_NUMBER){
 
         RetVal = E_OS_ID;
@@ -53,7 +53,7 @@ FUNC(StatusType, OS_CODE) GetAlarmBase ( AlarmType AlarmID, AlarmBaseRefType Inf
         Info->ticksperbase = OsCounter_Array[OsAlarm_Array[AlarmID].OsAlarmCounterRef].OsCounterTicksPerBase;
 
     }
-
+    CS_OFF;
     return RetVal;
 }
 
@@ -70,7 +70,7 @@ FUNC(StatusType, OS_CODE) GetAlarmBase ( AlarmType AlarmID, AlarmBaseRefType Inf
 FUNC(StatusType, OS_CODE) GetAlarm ( AlarmType AlarmID, TickRefType Tick) {
 
     StatusType RetVal = E_OK;
-
+    CS_ON;
     /* return the difference between the current counter value and the alarm expiry value */
 
 #if OS_MODE == OS_STANDARD
@@ -131,7 +131,7 @@ FUNC(StatusType, OS_CODE) GetAlarm ( AlarmType AlarmID, TickRefType Tick) {
     }
 
 #endif
-
+    CS_OFF;
     return RetVal;
 
 }
@@ -151,7 +151,7 @@ FUNC(StatusType, OS_CODE) GetAlarm ( AlarmType AlarmID, TickRefType Tick) {
 FUNC(StatusType, OS_CODE) SetRelAlarm ( AlarmType AlarmID, TickType increment, TickType cycle ) {
 
     VAR( StatusType, AUTOMATIC )   RetVal = E_OK;
-
+    CS_ON;
 #if OS_MODE == OS_STANDARD
 
         if( OsAlarmInternal_Array[AlarmID].InUse == FALSE ){
@@ -209,7 +209,7 @@ FUNC(StatusType, OS_CODE) SetRelAlarm ( AlarmType AlarmID, TickType increment, T
 
 #endif
 
-
+    CS_OFF;
     return RetVal;
 
     }
@@ -229,6 +229,8 @@ FUNC(StatusType, OS_CODE) SetRelAlarm ( AlarmType AlarmID, TickType increment, T
 FUNC(StatusType, OS_CODE) SetAbsAlarm ( AlarmType AlarmID, TickType start, TickType cycle ) {
 
     StatusType RetVal = E_OK;
+
+    CS_ON;
 
 #if OS_MODE == OS_STANDARD
 
@@ -286,7 +288,7 @@ FUNC(StatusType, OS_CODE) SetAbsAlarm ( AlarmType AlarmID, TickType start, TickT
     }
 
 #endif
-
+    CS_OFF;
     return RetVal;
 
 }
@@ -299,6 +301,8 @@ FUNC(StatusType, OS_CODE) SetAbsAlarm ( AlarmType AlarmID, TickType start, TickT
 FUNC(StatusType, OS_CODE) CancelAlarm ( AlarmType AlarmID ) {
 
     StatusType RetVal = E_OK;
+
+    CS_ON;
 
 #if OS_MODE == OS_STANDARD
 
@@ -330,6 +334,8 @@ FUNC(StatusType, OS_CODE) CancelAlarm ( AlarmType AlarmID ) {
      }
 
 #endif
+
+    CS_OFF;
 
     return RetVal;
 

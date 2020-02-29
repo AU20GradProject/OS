@@ -28,7 +28,7 @@ FUNC( StatusType, OS_CODE) IncrementCounter( CounterType CounterID ){
 
     StatusType RetVal = E_OK;
 
-#if OS_MODE == OS_STANDARD
+    #if OS_MODE == OS_STANDARD
 
 
     OsCounterInternal_Array[CounterID].OsCounterTicksValue++;
@@ -97,7 +97,7 @@ FUNC( StatusType, OS_CODE) GetCounterValue( CounterType CounterID, TickRefType V
 {
     StatusType RetVal = E_OK;
 
-
+    CS_ON;
     *Value =  OsCounterInternal_Array[CounterID].OsCounterVal;
 
 #if OS_MODE == OS_STANDARD
@@ -117,7 +117,7 @@ FUNC( StatusType, OS_CODE) GetCounterValue( CounterType CounterID, TickRefType V
     }
 
 #endif
-
+    CS_OFF;
     return RetVal;
 }
 
@@ -134,7 +134,7 @@ FUNC( StatusType, OS_CODE) GetElapsedValue( CounterType CounterID, TickRefType V
 
     StatusType RetVal = E_OK;
 
-
+    CS_ON;
 #if OS_MODE == OS_STANDARD
 
 
@@ -142,7 +142,7 @@ FUNC( StatusType, OS_CODE) GetElapsedValue( CounterType CounterID, TickRefType V
 
 
 #endif
-
+    CS_OFF;
     return RetVal;
 
 }

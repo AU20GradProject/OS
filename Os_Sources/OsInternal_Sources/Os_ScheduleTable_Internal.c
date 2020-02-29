@@ -71,6 +71,7 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
                     pCounter++ )
                 {
                     ActivateTask(ScheduleTableTaskActivation_Array[pCounter]);
+                    sendStringPA1("Activate Task\r\n");
                 }
 
                 /* Event Setting */
@@ -79,6 +80,7 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
                     pCounter++ )
                 {
                     SetEvent(ScheduleTableTaskSet_Array[pCounter],ScheduleTableEventSet_Array[pCounter]);
+                    sendStringPA1("Set Event\r\n");
                 }
 
                 if((ScheduleTableInternal_Array[i].CurrentExpiryPointIndex == ScheduleTable_Array[i].ExpiryPointsNumber - 1) &&
