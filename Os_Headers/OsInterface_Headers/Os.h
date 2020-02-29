@@ -24,6 +24,7 @@
 #include "Os_Counter.h"
 #include "Os_Alarm.h"
 #include "Os_ScheduleTable.h"
+#include "../OsInternal_Headers/Os_Gpt_Internal.h" /* used in testing the OS in main function */ 
 
 
 

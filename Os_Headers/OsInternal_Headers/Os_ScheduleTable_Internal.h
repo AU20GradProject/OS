@@ -1,7 +1,7 @@
 /*
 
-    Written by : Bebo
-    DATE : 7/2/2019
+    Written by : Bakr
+    DATE : 18/2/2020
     AUTOSAR Version : 4.3.1
     DOC Name : AUTOSAR_SWS_OS.pdf
     Target : ARM TIVA_C TM4C123GH6PM
@@ -41,7 +41,7 @@ typedef struct
     VAR( uint16, AUTOMATIC ) EventSetNumber ;
 
     /* pointer to first event to set in the point */
-    P2VAR( uint16, AUTOMATIC, AUTOMATIC ) FirstEventSet ;
+    VAR( uint16, AUTOMATIC ) FirstEventSet ;
 
     /*index of first first task to set its event in the point */
     VAR( uint16, AUTOMATIC ) FirstEventSetTask_Ptr ;
@@ -90,6 +90,14 @@ typedef struct
 
 } OsScheduleTableExpiryPoint ;
 
+typedef struct{
+
+    VAR( TickType , AUTOMATIC ) EPCurrentOffset;
+
+    VAR( TickType , AUTOMATIC ) EPFullOffset;
+
+}ExpiryPointOffset;
+
 typedef struct
 {
 
@@ -126,7 +134,7 @@ typedef struct{
     VAR( uint8, AUTOMATIC ) CurrentState;
 
     /* Offset to start from current counter */
-    VAR( TickType, AUTOMATIC ) StartCounterVal;
+    VAR( TickType, AUTOMATIC ) ScheduleTableDuration;
 
     /* Next schedule ID if there is */
     VAR ( sint16 , AUTOMATIC ) NextScheduleTable;

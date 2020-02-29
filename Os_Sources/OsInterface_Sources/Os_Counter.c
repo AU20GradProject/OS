@@ -1,7 +1,7 @@
 /*
 
-    Written by : Bebo
-    DATE : 7/2/2019
+    Written by : Bakr
+    DATE : 18/2/2020
     AUTOSAR Version : 4.3.1
     DOC Name : AUTOSAR_SWS_OS.pdf
     Target : ARM TIVA_C TM4C123GH6PM
@@ -50,7 +50,7 @@ FUNC( StatusType, OS_CODE) IncrementCounter( CounterType CounterID ){
 
 #elif OS_MODE == OS_EXTENDED
 
-    if(0 > CounterID || COUNTERS_NUMBER <= CounterID ){
+    if(COUNTERS_NUMBER <= CounterID ){
 
         RetVal = E_OS_ID;
 
@@ -106,7 +106,7 @@ FUNC( StatusType, OS_CODE) GetCounterValue( CounterType CounterID, TickRefType V
 
 #elif OS_MODE == OS_EXTENDED
 
-    if(CounterID < 0 || CounterID >= COUNTERS_NUMBER  ){
+    if(CounterID >= COUNTERS_NUMBER  ){
 
         RetVal = E_OS_ID;
 

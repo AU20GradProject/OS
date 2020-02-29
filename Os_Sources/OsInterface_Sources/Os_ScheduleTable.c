@@ -1,7 +1,7 @@
 /*
 
-    Written by : Bebo
-    DATE : 7/2/2019
+    Written by : Bakr
+    DATE : 18/2/2020
     AUTOSAR Version : 4.3.1
     DOC Name : AUTOSAR_SWS_OS.pdf
     Target : ARM TIVA_C TM4C123GH6PM
@@ -20,9 +20,6 @@ extern VAR( OsScheduleTableInternal, OS_CONFIG_DATA ) ScheduleTableInternal_Arra
 
 extern CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] ;
 
-//extern CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] ;
-
-//extern CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET_NUMBER ] ;
 
 extern CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] ;
 
@@ -30,7 +27,7 @@ extern CONST( OsCounter, OS_CONFIG_DATA ) OsCounter_Array [ COUNTERS_NUMBER ] ;
 
 extern VAR( OsCounterInternal, OS_DATA)   OsCounterInternal_Array [COUNTERS_NUMBER ];
 
-extern VAR( TickType, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
+extern VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
 
 /*
      - Service: 0x07, Synchronous, Reentrant
@@ -75,17 +72,20 @@ FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTable
            The Initial Expiry Point shall be processed after <Offset> + Initial Offset ticks have elapsed on the underlying counter.
            The state of <ScheduleTableID> is set to SCHEDULETABLE_RUNNING before the service returns to the caller. ( ) */
 
-        /* store the current value of the counter */
-        //ScheduleTableInternal_Array[ScheduleTableID].StartCounterVal = Offset + OsCounterInternal_Array[ScheduleTable_Array[ScheduleTableID].OsScheduleTableCounterRef].OsCounterVal;
 
         for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
 
-            ScheduleTablePointsOffsets_Array[j] = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
 
         }
 
         /* set index of schedule table expiry point to start */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentExpiryPointIndex = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint;
+
+        ScheduleTableInternal_Array[ScheduleTableID].ScheduleTableDuration = ScheduleTable_Array[ScheduleTableID].OsScheduleTableDuration + Offset;
+
+        ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable = EMPTY_NEXT_TABLE;
 
         /* set schedule table state to running */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_RUNNING;
@@ -134,17 +134,20 @@ FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTable
            The state of <ScheduleTableID> is set to SCHEDULETABLE_RUNNING before the service returns to the caller. ( ) */
 
         /* store the current value of the counter */
-        //ScheduleTableInternal_Array[ScheduleTableID].StartCounterVal = Offset + OsCounterInternal_Array[ScheduleTable_Array[ScheduleTableID].OsScheduleTableCounterRef].OsCounterVal;
-
 
         for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
 
-            ScheduleTablePointsOffsets_Array[j] = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
 
         }
 
         /* set index of schedule table expiry point to start */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentExpiryPointIndex = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint;
+
+        ScheduleTableInternal_Array[ScheduleTableID].ScheduleTableDuration = ScheduleTable_Array[ScheduleTableID].OsScheduleTableDuration + Offset;
+
+        ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable = EMPTY_NEXT_TABLE;
 
         /* set schedule table state to running */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_RUNNING;
@@ -206,11 +209,17 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
 
        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
 
-           ScheduleTablePointsOffsets_Array[j] = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+           ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+           ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
 
        }
         /* set index of schedule table expiry point to start */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentExpiryPointIndex = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint;
+
+        ScheduleTableInternal_Array[ScheduleTableID].ScheduleTableDuration = ScheduleTable_Array[ScheduleTableID].OsScheduleTableDuration+ Offset;
+
+
+        ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable = EMPTY_NEXT_TABLE;
 
         /* set schedule table state to running */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_RUNNING;
@@ -254,8 +263,6 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
                 - SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS (for implicitly synchronized schedule table) before returning to the user.
                 (The Initial Expiry Point will be processed when the underlying counter next equals <Start>+Initial Offset).  ( ) */
 
-        /* store the current value of the counter */
-        //ScheduleTableInternal_Array[ScheduleTableID].StartCounterVal = Start;
 
         if(OsCounterInternal_Array[ScheduleTable_Array[ScheduleTableID].OsScheduleTableCounterRef].OsCounterVal > Start){
             Offset = OsCounter_Array[ScheduleTable_Array[ScheduleTableID].OsScheduleTableCounterRef].OsCounterMaxAllowedValue - OsCounterInternal_Array[ScheduleTable_Array[ScheduleTableID].OsScheduleTableCounterRef].OsCounterVal
@@ -269,11 +276,16 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
 
         for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
 
-            ScheduleTablePointsOffsets_Array[j] = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
+            ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
 
         }
         /* set index of schedule table expiry point to start */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentExpiryPointIndex = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint;
+
+        ScheduleTableInternal_Array[ScheduleTableID].ScheduleTableDuration = ScheduleTable_Array[ScheduleTableID].OsScheduleTableDuration+ Offset;
+
+        ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable = EMPTY_NEXT_TABLE;
 
         /* set schedule table state to running */
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_RUNNING;
@@ -305,7 +317,7 @@ FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID
 
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_STOPPED;
 
-        if(ScheduleTableInternal_Array[ScheduleTableID].CurrentState != EMPTY_NEXT_TABLE){
+        if(ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable != EMPTY_NEXT_TABLE){
 
             ScheduleTableInternal_Array[ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable].CurrentState = SCHEDULETABLE_STOPPED;
 
@@ -332,7 +344,7 @@ FUNC( StatusType, OS_CODE ) StopScheduleTable( ScheduleTableType ScheduleTableID
 
         ScheduleTableInternal_Array[ScheduleTableID].CurrentState = SCHEDULETABLE_STOPPED;
 
-        if(ScheduleTableInternal_Array[ScheduleTableID].CurrentState != EMPTY_NEXT_TABLE){
+        if(ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable != EMPTY_NEXT_TABLE){
 
             ScheduleTableInternal_Array[ScheduleTableInternal_Array[ScheduleTableID].NextScheduleTable].CurrentState = SCHEDULETABLE_STOPPED;
 
@@ -384,13 +396,13 @@ FUNC( StatusType, OS_CODE ) NextScheduleTable( ScheduleTableType ScheduleTableID
             /* change the state of the previous next table */
             ScheduleTableInternal_Array[ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable].CurrentState = SCHEDULETABLE_STOPPED;
 
-            /* set the next schedule table  */
-            ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable = ScheduleTableID_To;
-
-            /* change the state of ScheduleTableID_To*/
-            ScheduleTableInternal_Array[ScheduleTableID_To].CurrentState = SCHEDULETABLE_NEXT;
-
         }
+
+        /* set the next schedule table  */
+        ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable = ScheduleTableID_To;
+
+        /* change the state of ScheduleTableID_To*/
+        ScheduleTableInternal_Array[ScheduleTableID_To].CurrentState = SCHEDULETABLE_NEXT;
 
     }
 
@@ -438,13 +450,13 @@ FUNC( StatusType, OS_CODE ) NextScheduleTable( ScheduleTableType ScheduleTableID
             /* change the state of the previous next table */
             ScheduleTableInternal_Array[ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable].CurrentState = SCHEDULETABLE_STOPPED;
 
-            /* set the next schedule table  */
-            ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable = ScheduleTableID_To;
-
-            /* change the state of ScheduleTableID_To*/
-            ScheduleTableInternal_Array[ScheduleTableID_To].CurrentState = SCHEDULETABLE_NEXT;
-
         }
+
+        /* set the next schedule table  */
+        ScheduleTableInternal_Array[ScheduleTableID_From].NextScheduleTable = ScheduleTableID_To;
+
+        /* change the state of ScheduleTableID_To*/
+        ScheduleTableInternal_Array[ScheduleTableID_To].CurrentState = SCHEDULETABLE_NEXT;
 
     }
 

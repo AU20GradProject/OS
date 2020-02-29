@@ -174,7 +174,7 @@ VAR( OsScheduleTableInternal, OS_DATA ) ScheduleTableInternal_Array [ TABLES_NUM
 
 CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] = OS_TABLESS_POINTS_OBJECT_CONGIFURATION ;
 
-VAR( TickType, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
+VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
 
 CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] = OS_TABLESS_TASKS_OBJECT_CONGIFURATION ;
 

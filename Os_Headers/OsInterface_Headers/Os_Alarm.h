@@ -1,18 +1,14 @@
 /*
- * Os_Alarm.h
- *
- *  Created on: Feb 11, 2020
- *      Author: ME
+    Os_Alarm.h
+    Written by : Bakr
+    DATE : 18/2/2020
+    Created on: Feb 11, 2020
+    Author: ME
  */
 
 #ifndef OS_HEADERS_OSINTERFACE_HEADERS_OS_ALARM_H_
 #define OS_HEADERS_OSINTERFACE_HEADERS_OS_ALARM_H_
 
-/* represents count values in ticks. */
-typedef VAR ( uint32 ,TYPEDEF ) TickType ;
-
-/* points to the data type TickType */
-typedef P2VAR ( TickType ,TYPEDEF, TYPEDEF ) TickRefType ;
 
 /* structure for storage of counter characteristics */
 typedef VAR (struct, TYPEDEF)

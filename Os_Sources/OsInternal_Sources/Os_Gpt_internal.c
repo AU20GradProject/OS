@@ -1,8 +1,9 @@
 /*
- * Os_Gpt_internal.c
- *
- *  Created on: Feb 15, 2020
- *      Author: midobakr
+
+   Os_Gpt_internal.c
+   Written by : Bakr
+   DATE : 18/2/2020
+
  */
 
 #ifndef OS_SOURCES_OSINTERNAL_SOURCES_OS_GPT_INTERNAL_C_

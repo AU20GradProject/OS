@@ -1,15 +1,14 @@
 /*
- * Os_Gpt.h
- *
- *  Created on: Feb 15, 2020
- *      Author: midobakr
+        Os_Gpt.h
+        Written by : Bakr
+        DATE : 18/2/2020
  */
 
 #ifndef OS_HEADERS_OSINTERNAL_HEADERS_OS_GPT_INTERNAL_H_
 #define OS_HEADERS_OSINTERNAL_HEADERS_OS_GPT_INTERNAL_H_
 
 /* Configurations */
-#define SYSTICK_TICK_DURATION_MS        500u
+#define SYSTICK_TICK_DURATION_MS        1u
 #define SYSTICK_ENABLE                  STD_ON
 #define SYSTICK_INT_ENABLE              STD_ON
 #define SYSTICK_CLK_SRC                 CLK_SRC_PIOSC_DIV4

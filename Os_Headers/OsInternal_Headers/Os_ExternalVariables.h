@@ -173,7 +173,7 @@ extern CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABL
 
 extern VAR( OsScheduleTableInternal, OS_DATA ) ScheduleTableInternal_Array [ TABLES_NUMBER ] ;
 
-extern VAR( TickType, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
+extern VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
 
 /**************************************************************************/
 
