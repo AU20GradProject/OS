@@ -34,15 +34,18 @@ FUNC(void, AUTOMATIC) EnableAllInterrupts(void){
 /*
 * This service is a counterpart of DisableAllInterrupts service, which has to be called before, and its aim is the completion of the critical section of code.
 */
-    if (ActiveIsrDisable != DisAllIntActive){
+    if (ActiveIsrDisable != DisAllIntActive)
+    {
         /* Error interrupts wasnot disabled using DisableAllInterrupts before enabling it*/
-        return;
     }
+    else
+    {
 /*
 * The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service enables recognition of interrupts by the central processing unit.
 */
-    ActiveIsrDisable = NoDisableActive; /* cannot be interrupted after because interrupt is disabled.*/
-    __asm volatile ("CPSIE i");
+    	ActiveIsrDisable = NoDisableActive; /* cannot be interrupted after because interrupt is disabled.*/
+    	__asm volatile (" CPSIE i");
+	}
     return;
 }
 
@@ -62,10 +65,10 @@ FUNC(void, AUTOMATIC) DisableAllInterrupts(void){
     */   
     if (ActiveIsrDisable != NoDisableActive){
         /* Error nesting is not supported*/
-        return;
+    }else{
+    	__asm volatile (" CPSID i");
+    	ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
     }
-    __asm volatile ("CPSID i");
-    ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
     return;
 }
 /* The rest of the functions werenot implemented because we donot need them */
@@ -81,13 +84,15 @@ FUNC(void, AUTOMATIC) ResumeAllInterrupts(void){
 
     if (ActiveIsrDisable != SuspendAllIntActive){
         /* Error interrupts wasnot suspended before resuming them*/
-        return;
-    }
+    }else{
     /*
     The implementation should adapt this service to the target hardware providing a minimum overhead.
     SuspendAllInterrupts/ResumeAllInterrupts can be nested. In case of nesting pairs of the calls SuspendAllInterrupts and ResumeAllInterrupts the interrupt recognition status saved by the first call of SuspendAllInterrupts is restored by the last call of the ResumeAllInterrupts service.
     */
-    ActiveIsrDisable = NoDisableActive;
+    	ActiveIsrDisable = NoDisableActive;
+    	__asm volatile (" CPSIE i");
+	}
+	return;
 }
 
 /*This service saves the recognition status of all interrupts and disables all interrupts for which the hardware supports disabling.*/
@@ -113,14 +118,15 @@ FUNC(void, AUTOMATIC) ResumeOSInterrupts(void){
     */
     if (ActiveIsrDisable != SuspendOSIntActive){
         /* Error OS interrupts wasnot suspended before resuming them*/
-        return;
-    }
-
+    }else{
     /*
     The implementation should adapt this service to the target hardware providing a minimum overhead.
     SuspendOSInterrupts/ResumeOSInterrupts can be nested. In case of nesting pairs of the calls SuspendOSInterrupts and ResumeOSInterrupts the interrupt recognition status saved by the first call of SuspendOSInterrupts is restored by the last call of the ResumeOSInterrupts service.
     */
-    ActiveIsrDisable = NoDisableActive; //can be nested, so how to know if nested or not and how many nests 
+    	ActiveIsrDisable = NoDisableActive; //can be nested, so how to know if nested or not and how many nests 
+	    __asm volatile (" CPSIE i");
+	}
+	return;
 }
 
 /* This service saves the recognition status of interrupts of category 2 and disables the recognition of these interrupts.*/
