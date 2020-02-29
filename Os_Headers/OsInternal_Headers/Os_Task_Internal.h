@@ -28,52 +28,51 @@
 /* set pending bit of PendSv exception and set stack pointer to MSP */
 
 #define DISPATCHER_CALL  \
-                          __asm ( " MOV R12, #0x8000 " ) ; \
-                          __asm( " MOVT R12, #0x2000 " ) ; \
-                          __asm ( " MSR MSP, R12 " ) ; \
-                          __asm ( " MRS R9, CONTROL " ) ;\
-                          __asm ( " BIC R9, R9, #0x02 " ) ;\
-                          __asm ( " MSR CONTROL, R9 " ) ; \
+                          __asm ( " MOV R10, #0x8000 " ) ; \
+                          __asm( " MOVT R10, #0x2000 " ) ; \
+                          __asm ( " MSR MSP, R10 " ) ; \
+                          __asm ( " MRS R10, CONTROL " ) ;\
+                          __asm ( " BIC R10, R10, #0x02 " ) ;\
+                          __asm ( " MSR CONTROL, R10 " ) ; \
                           *( ( volatile P2VAR( uint32, AUTOMATIC, REGSPACE ) ) 0xE000ED04 ) |= ( 0x01u << 28 ) ;\
-                          __asm ( " MRS R9, CONTROL " ) ;\
-                          __asm ( " ORR R9, R9, #0x02 " ) ;\
-                          __asm ( " MSR CONTROL, R9 " )
+                          __asm ( " MRS R10, CONTROL " ) ;\
+                          __asm ( " ORR R10, R10, #0x02 " ) ;\
+                          __asm ( " MSR CONTROL, R10 " )
 
 
 
 /* set BASEPRI priority to be 7 to disable dispatcher*/
-#define DISPATCHER_OFF  __asm ( " MRS R9, BASEPRI " ) ;\
+#define DISPATCHER_OFF  __asm ( " SVC #0x32 " ) ; \
                         __asm ( " MOV R10, #0x0E0u " ) ;\
                         __asm ( " MSR BASEPRI_MAX, R10 " )
 
 
 /* befor convert to dipatcher make stack pointer for MSP*/
-#define DISPATCHER_ON    __asm ( " MRS R8, CONTROL " ) ;\
-                         __asm ( " BIC R8, R8, #0x02 " ) ;\
-                         __asm ( " MSR CONTROL, R8 " );\
-                         __asm ( " MSR BASEPRI_MAX, R9  " ) ;\
-                         __asm ( " MRS R8, CONTROL " ) ;\
-                         __asm ( " ORR R8, R8, #0x02 " ) ;\
-                         __asm ( " MSR CONTROL, R8 " )
+#define DISPATCHER_ON    __asm ( " SVC #0x32 " ) ; \
+                         __asm ( " MRS R10, CONTROL " ) ;\
+                         __asm ( " BIC R10, R10, #0x02 " ) ;\
+                         __asm ( " MSR CONTROL, R10 " );\
+                         __asm ( " MOV R10, #0x01F " );\
+                         __asm ( " MSR BASEPRI_MAX, R10  " ) ;\
+                         __asm ( " MRS R10, CONTROL " ) ;\
+                         __asm ( " ORR R10, R10, #0x03 " ) ;\
+                         __asm ( " MSR CONTROL, R10 " )
 
 
 /* set and clear PRIMASK register*/
-#define CS_ON       __asm ( " CPSID i " ) ; \
-                    CriticalSection_Semaphore ++
+#define CS_ON           __asm ( " SVC #0x32 " ) ; \
+                        __asm ( " CPSID i " ) ;
 
-#define CS_OFF  if( 0 == ( -- CriticalSection_Semaphore ) ) \
-                { \
-                   __asm ( " MRS R8, CONTROL " ) ;\
-                   __asm ( " BIC R8, R8, #0x02 " ) ;\
-                   __asm ( " MSR CONTROL, R8 " );\
+
+#define CS_OFF      \
+                   __asm ( " MRS R10, CONTROL " ) ;\
+                   __asm ( " BIC R10, R10, #0x02 " ) ;\
+                   __asm ( " MSR CONTROL, R10 " );\
                    __asm ( " CPSIE i " ) ; \
-                   __asm ( " MRS R8, CONTROL " ) ;\
-                   __asm ( " ORR R8, R8, #0x02 " ) ;\
-                   __asm ( " MSR CONTROL, R8 " ) ;\
-                } \
-                else \
-                { \
-                }
+                   __asm ( " MRS R10, CONTROL " ) ;\
+                   __asm ( " ORR R10, R10, #0x03 " ) ;\
+                   __asm ( " MSR CONTROL, R10 " ) ;
+
 
 typedef struct
 {
@@ -205,6 +204,10 @@ void OsDispatcher (void) ;
  * add or rempoving depend on AddToQueue parameter if TRUE then add if false then remove */
 void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue ) ;
 
+
+/* used to execute code before calling tasks code
+ * executed code will initialize stack pointer */
+void OsTaskFrame (void) ;
 
 
 

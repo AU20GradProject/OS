@@ -82,12 +82,12 @@ void OsDispatcher (void)
         __asm ( " MSR MSP, R12 " ) ;
 
         /* take copy for ReadyTaskPCB_Index, CS for read modify write sequence from ReadyTaskPCB_Index to ReadyHighestPriority*/
-        CS_ON ;
+        __asm ( " CPSID i " ) ;
 
         DispatcherLocal_Variable = ReadyTaskPCB_Index ;
         PreemptionPriority = OsTasks_Array[ ( OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_ID ) ].OsTaskCeillingPriority_Internal ;
 
-        CS_OFF ;
+        __asm ( " CPSIE i " ) ;
 
         /* write values of next running task into stack to be popped into registers */
 
@@ -159,7 +159,6 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
     if( TRUE == AddToQueue )    /* add pcb to ready queue */
     {
         /* critical section to read modify write to OsTasksPriorityNext_Array */
-        CS_ON ;
 
         /* take a copy */
         TempVariable = OsTasksPriorityNext_Array[TaskPriority] ;
@@ -167,7 +166,6 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
         /* allocation for resource ( empty place in ready queue ) */
         OsTasksPriorityNext_Array[TaskPriority] = ( OsTasksPriorityNext_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
 
-        CS_OFF ;
 
         /* put Task PCB in ready queue*/
         OsTasksPriority_Array[ TaskPriority][ TempVariable ] = PCB_Index ;
@@ -184,7 +182,6 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
         /* check for preemption and calling dispatcher */
 
         /* critical section to read modify write to ReadyHighestPriority & DISPATCHER_CALL & ReadyTaskPCB_Index */
-        CS_ON ;
 
         if( TaskPriority > ReadyHighestPriority )  /* if task priority is the highest in current system */
         {
@@ -214,7 +211,6 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
         {
         }
 
-        CS_OFF ;
 
     } /* if */
     else    /* remover pcb from ready queue */
@@ -233,7 +229,6 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
         {
 
             /* critical section to read modify write to OsTasksPriority_Array & ReadyHighestPriority & ReadyTaskPCB_Index */
-            CS_ON ;
 
             /* remove PCB index from ready queue and shift first element in queue
              * done in critical section just before calling dispatcher, because if preempted
@@ -296,12 +291,12 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 
         }  /* else */
 
-        CS_OFF ;
 
         DISPATCHER_CALL ;
 
 
     } /* else */
+
 
     return ;
 }
@@ -309,4 +304,18 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 
 
 /*****************************************************************************/
+
+
+void OsTaskFrame (void)
+{
+
+
+    __asm ( " MRS R10, CONTROL " ) ;
+    __asm ( " ORR R10, R10, #0x02 " ) ;
+    __asm ( " MSR CONTROL, R10 " ) ;
+
+    __asm ( " MOV PC, R11 " ) ;
+
+    return ;
+}
 

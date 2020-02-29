@@ -43,7 +43,6 @@ Target : ARM TIVA_C TM4C123GH6PM
 #define OS_CONST                /* used for global or static constants */
 #define OS_APPL_CONST           /* used for global or static pointer to constants */
 #define OS_VAR_CLEARED          /* for variables that are cleared to zero after every reset */
-#define OS_VAR_INIT             /* for variables that are initialized with values after every reset */
 
 
 

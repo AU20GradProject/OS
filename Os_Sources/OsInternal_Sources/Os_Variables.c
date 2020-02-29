@@ -15,7 +15,8 @@
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
 
 /**************************************************************************/
-
+/* used to hold pc of tasks which will be called inside task frame */
+P2FUNC( void, OS_VAR_CLEARED, OsTaskCode_Ptr ) (void)  ;
 
 /* used for define OS object in the system */
 CONST( OsOS, OS_CONFIG_DATA ) OS = OS_OS_OBJECT_CONGIFURATION ;
@@ -111,10 +112,6 @@ CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] = OS_ISRS_OBJECT_CONG
 
 /* used to hold resource id of last resource occupied by isr */
 VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;
-
-
-/* list of resources accessed by every task */
-CONST( ResourceType, OS_CONFIG_DATA ) OsIsrsResources_Array [ TOTAL_ISRS_RESOURCES_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;
 
 
 

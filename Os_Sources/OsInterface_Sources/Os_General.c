@@ -42,7 +42,7 @@ void StartOS ( AppModeType Mode )
         /* determine stop index of tasks which will be activated by for loop */
         LocalTemp = OsAppModes_Array [Mode].AutoStartTasks_Index + OsAppModes_Array [Mode].AutoStartTasks_Number ;
 
-        for( ; LocalCounter <= LocalTemp ; LocalCounter++ )
+        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
         {
             ActivateTask( OsAutoStartTasks_Array[LocalCounter] ) ;
 
@@ -65,7 +65,7 @@ void StartOS ( AppModeType Mode )
         /* determine stop index of alarms which will be activated by for loop */
         LocalTemp = OsAppModes_Array [Mode].AutoStartAlarms_Index + OsAppModes_Array [Mode].AutoStartAlarms_Number ;
 
-        for( ; LocalCounter <= LocalTemp ; LocalCounter++ )
+        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
         {
             if( ALARM_ABSOLUTE == OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAutostartType )
             {
@@ -102,7 +102,7 @@ void StartOS ( AppModeType Mode )
         /* determine stop index of schedule tables which will be activated by for loop */
         LocalTemp = OsAppModes_Array [Mode].AutoStartScheduleTables_Index + OsAppModes_Array [Mode].AutoStartScheduleTables_Number ;
 
-        for( ; LocalCounter <= LocalTemp ; LocalCounter++ )
+        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
         {
 
             if( TABLE_ABSOLUTE == OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableAutostartType )
@@ -147,5 +147,4 @@ void ShutdownOS ( StatusType Error )
     CS_ON ;
     while (1) ;
 
-    return ;
 }

@@ -35,6 +35,8 @@
  interrupt routine is higher than the calculated ceiling priority, E_OS_ACCESS*/
 StatusType GetResource ( ResourceType ResID )
 {
+    CS_ON ;
+
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
     VAR( uint8, AUTOMATIC ) CeilingPriority  ;
 
@@ -53,7 +55,6 @@ StatusType GetResource ( ResourceType ResID )
                  * case it try to get ResID instead of its resource  */
 
                 /* first thing to do is allocate resource */
-                CS_ON ;
 
 
                 /* save old preemption priority */
@@ -121,7 +122,6 @@ StatusType GetResource ( ResourceType ResID )
                         case 0x0Fu :
                         {
 
-                            CS_ON ;
 
                             break ;
 
@@ -137,7 +137,6 @@ StatusType GetResource ( ResourceType ResID )
 
                 OsTaskResourceAllocation[ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority ) ] = PreemptionPriority ;
 
-                CS_OFF
 
                 /* modify resource setting */
                 OsResourcePCB_Array[ ResID ].OsResourceOwner = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority ;
@@ -194,6 +193,8 @@ StatusType GetResource ( ResourceType ResID )
 
     } /* else */
 
+    CS_OFF ;
+
     return ReturnResult ;
 }
 
@@ -210,6 +211,8 @@ StatusType GetResource ( ResourceType ResID )
  * the statically assigned priority of the calling task or interrupt routine, E_OS_ACCESS */
 StatusType ReleaseResource ( ResourceType ResID )
 {
+    CS_ON ;
+
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
     VAR( uint8, AUTOMATIC ) CeilingPriority  ;
 
@@ -232,7 +235,6 @@ StatusType ReleaseResource ( ResourceType ResID )
 
 
                     /* critical section to modify preemption priority */
-                    CS_ON ;
 
 
 
@@ -240,7 +242,6 @@ StatusType ReleaseResource ( ResourceType ResID )
                     if ( PreemptionPriority == 0x0F )
                     {
                         /* related to CS_ON in GetResource : case 0x0F */
-                        CS_OFF ;
                     }
                     else
                     {
@@ -315,8 +316,6 @@ StatusType ReleaseResource ( ResourceType ResID )
                             case 0x0Fu :
                             {
 
-                                CS_ON ;
-
                                 break ;
 
                             }
@@ -344,7 +343,7 @@ StatusType ReleaseResource ( ResourceType ResID )
 
                     }
 
-                    CS_OFF
+
 
                 }
                 else
@@ -408,7 +407,6 @@ StatusType ReleaseResource ( ResourceType ResID )
                         if ( OsResource_Array[ ResID ].OsResourcePriority == 0x0F )
                         {
                             /* related to CS_ON in GetResource : case 0x0F */
-                            CS_OFF ;
                         }
                         else
                         {
@@ -515,7 +513,10 @@ StatusType ReleaseResource ( ResourceType ResID )
 
     }
 
+    CS_OFF ;
+
     return ReturnResult ;
+
 
 }
 

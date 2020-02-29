@@ -26,6 +26,7 @@
  * Task <TaskID> is invalid, E_OS_ID */
 StatusType ActivateTask ( TaskType TaskID )
 {
+    CS_ON ;
 
     VAR( uint8, AUTOMATIC ) LocalCounter = 0 ;
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
@@ -37,7 +38,6 @@ StatusType ActivateTask ( TaskType TaskID )
         /* determine empty PCB to place the task */
         /* critical section to ready modify write for Task_ID of PCB & NotSuspendedTasks_Number
          * OsTasksPCB_Index_Array is shared resource and ready modify write sequence will happen  */
-        CS_ON ;
 
         if( INVALID_TASK == OsTasksPCB_Index_Array[TaskID] )    /* task is suspended */
         {
@@ -57,8 +57,6 @@ StatusType ActivateTask ( TaskType TaskID )
                 OsTasksPCB_Index_Array[TaskID] = LocalCounter ;
 
 
-                CS_OFF ;
-
                 /* initialize task PCB */
                 OsTasksPCB_Array[LocalCounter].Task_ID = TaskID ;
                 OsTasksPCB_Array[LocalCounter].Task_Priority = OsTasks_Array[TaskID].OsTaskPriority ;
@@ -66,7 +64,7 @@ StatusType ActivateTask ( TaskType TaskID )
                 OsTasksPCB_Array[LocalCounter].Task_ResourcesOccupied = 0 ;
                 OsTasksPCB_Array[LocalCounter].Task_LastResourceOccupied = NO_RESOURCE ;
                 OsTasksPCB_Array[LocalCounter].Task_State = READY ;
-                OsTasksPCB_Array[LocalCounter].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[LocalCounter]).Task_Stack ) [TASK_STACK_SIZE-1] ) - 10) ;
+                OsTasksPCB_Array[LocalCounter].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[LocalCounter]).Task_Stack ) [TASK_STACK_SIZE] ) ) ;
                 OsTasksPCB_Array[LocalCounter].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[LocalCounter].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[LocalCounter].Task_PC = OsTasksNames_Array[TaskID] ;
@@ -78,7 +76,6 @@ StatusType ActivateTask ( TaskType TaskID )
             else
             {
 
-                CS_OFF ;
                 /* system reach to maximum not suspended tasks */
                 ReturnResult = E_OS_LIMIT ;
 
@@ -102,7 +99,6 @@ StatusType ActivateTask ( TaskType TaskID )
                 ReturnResult = E_OS_LIMIT ;
             }/* else */
 
-            CS_OFF ;
 
         }/* else */
 
@@ -113,7 +109,10 @@ StatusType ActivateTask ( TaskType TaskID )
         ReturnResult = E_OS_ID ;
     }
 
+    CS_OFF ;
+
     return ReturnResult ;
+
 }
 
 
@@ -129,6 +128,9 @@ StatusType ActivateTask ( TaskType TaskID )
 
 StatusType TerminateTask ( void )
 {
+
+    CS_ON ;
+
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
     VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ;
 
@@ -144,7 +146,6 @@ StatusType TerminateTask ( void )
             {
 
                 /* critical section to modify priority queue */
-                CS_ON ;
 
                 /* remove PCB index from ready queue and shift first element in queue
                  * done in critical section just before calling dispatcher, because if preempted
@@ -164,7 +165,7 @@ StatusType TerminateTask ( void )
                 /* initialize task PCB */
 
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_State = READY ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [TASK_STACK_SIZE-1] ) - 10) ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [0 ] )) ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PC = OsTasksNames_Array[ (OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ] ;
@@ -176,7 +177,6 @@ StatusType TerminateTask ( void )
                 DISPATCHER_CALL ;
 
 
-                CS_OFF ;
 
             }
             else
@@ -200,6 +200,8 @@ StatusType TerminateTask ( void )
         /* called form interrupt */
         ReturnResult = E_OS_CALLEVEL ;
     }
+
+    CS_OFF ;
 
     return ReturnResult ;
 }
@@ -255,6 +257,9 @@ StatusType ChainTask ( TaskType TaskID )
 
 StatusType Schedule ( void )
 {
+    CS_ON ;
+
+
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
 
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
@@ -262,7 +267,6 @@ StatusType Schedule ( void )
         /* no need to critical section because RunningTaskPCB_Index won't be corrupted by other task */
         if ( 0 == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ResourcesOccupied )
         {
-            CS_ON ;
 
             /* determine next running task's pcb and release internal resource */
             ReadyTaskPCB_Index = OsTasksPriority_Array [ReadyHighestPriority] [ (OsTasksPriorityIndex_Array[ReadyHighestPriority]) ] ;
@@ -270,7 +274,6 @@ StatusType Schedule ( void )
             PreemptionPriority = FALSE ;
             DISPATCHER_CALL ;
 
-            CS_OFF ;
         }
         else
         {
@@ -285,6 +288,9 @@ StatusType Schedule ( void )
         ReturnResult = E_OS_CALLEVEL ;
 
     }
+
+    CS_OFF ;
+
     return ReturnResult ;
 }
 

@@ -29,6 +29,8 @@
 
 StatusType SetEvent ( TaskType TaskID, EventMaskType Mask )
 {
+    CS_ON ;
+
     VAR ( StatusType, AUTOMATIC ) ReturnResult = E_OK ;
     VAR ( uint8, AUTOMATIC ) PCB_Index ;
 
@@ -41,7 +43,6 @@ StatusType SetEvent ( TaskType TaskID, EventMaskType Mask )
             Mask &= OsTasks_Array[ TaskID ].OsTaskEventRef ;
 
             /* critical section to protect read modify write sequence, read from PCB_Index write to events flags  */
-            CS_ON ;
 
             PCB_Index = OsTasksPCB_Index_Array[ TaskID ] ;
 
@@ -53,20 +54,16 @@ StatusType SetEvent ( TaskType TaskID, EventMaskType Mask )
                 {
                     OsTasksPCB_Array[ PCB_Index ].Task_EvnetsWaiting = OS_EVENT_BASIC_TASK ;
 
-                    CS_OFF ;
-
                     /* add new task's pcb index to proper priority queue */
                     OsInternalScheduler ( PCB_Index, TRUE ) ;
 
                 }
                 else /* set event task isn't waiting for it */
                 {
-                    CS_OFF ;
                 }
             }
             else
             {
-                CS_OFF ;
                 /* task is suspended */
                 ReturnResult = E_OS_STATE ;
 
@@ -87,6 +84,8 @@ StatusType SetEvent ( TaskType TaskID, EventMaskType Mask )
         ReturnResult = E_OS_ID ;
     }
 
+    CS_OFF ;
+
     return ReturnResult ;
 }
 
@@ -100,6 +99,7 @@ StatusType SetEvent ( TaskType TaskID, EventMaskType Mask )
 
 StatusType ClearEvent ( EventMaskType Mask )
 {
+    CS_ON ;
 
     StatusType ReturnResult = E_OK ;
 
@@ -109,11 +109,9 @@ StatusType ClearEvent ( EventMaskType Mask )
         if ( OS_EVENT_BASIC_TASK != OsTasks_Array [ ( OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ].OsTaskEventRef )
         {
             /* critical section to read modify write of Task_EvnetsFlag */
-            CS_ON ;
 
             OsTasksPCB_Array[RunningTaskPCB_Index].Task_EvnetsFlag &= ~Mask ;
 
-            CS_OFF ;
         }
         else
         {
@@ -129,7 +127,10 @@ StatusType ClearEvent ( EventMaskType Mask )
         ReturnResult = E_OS_CALLEVEL ;
     }
 
+    CS_OFF ;
+
     return ReturnResult ;
+
 }
 
 /*****************************************************************************/
@@ -143,6 +144,7 @@ StatusType ClearEvent ( EventMaskType Mask )
 
 StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event )
 {
+    CS_ON ;
 
     StatusType ReturnResult = E_OK ;
     VAR ( uint8, AUTOMATIC ) PCB_Index ;
@@ -155,7 +157,6 @@ StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event )
         {
 
             /* critical section to protect read modify write sequence, read from PCB_Index write to  index of OsTasksPCB_Array */
-            CS_ON ;
 
             PCB_Index = OsTasksPCB_Index_Array[ TaskID ] ;
 
@@ -170,7 +171,6 @@ StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event )
 
             } /* else */
 
-            CS_OFF ;
         }
         else
         {
@@ -185,6 +185,8 @@ StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event )
         /* invalid task ID*/
         ReturnResult = E_OS_ID ;
     }
+
+    CS_OFF ;
 
     return ReturnResult ;
 }
@@ -202,6 +204,7 @@ StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event )
 StatusType WaitEvent ( EventMaskType Mask )
 {
 
+    CS_ON ;
 
     StatusType ReturnResult = E_OK ;
 
@@ -215,7 +218,6 @@ StatusType WaitEvent ( EventMaskType Mask )
             if ( 0 == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ResourcesOccupied )
             {
                 /* critical section to read modify write sequence, read for Task_EvnetsFlag,  write for Task_EvnetsWaiting, Task_State, and Dispatcher */
-                CS_ON ;
 
                 /* check if at least on event task is waiting is set or not*/
                 if ( OS_EVENT_BASIC_TASK == ( Mask & OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_EvnetsFlag ) )
@@ -231,7 +233,6 @@ StatusType WaitEvent ( EventMaskType Mask )
                 {
                     /* at least on event which task is waiting for is set */
                 }
-                CS_OFF ;
             }
             else
             {
@@ -256,6 +257,7 @@ StatusType WaitEvent ( EventMaskType Mask )
         ReturnResult = E_OS_CALLEVEL ;
     }
 
+    CS_OFF ;
 
     return ReturnResult ;
 }
