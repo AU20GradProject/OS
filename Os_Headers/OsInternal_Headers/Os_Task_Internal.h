@@ -39,13 +39,10 @@
 
 /* befor convert to dipatcher make stack pointer for MSP*/
 #define DISPATCHER_ON    __asm ( " SVC #0x32 " ) ; \
-                         __asm ( " MRS R10, CONTROL " ) ;\
-                         __asm ( " BIC R10, R10, #0x02 " ) ;\
-                         __asm ( " MSR CONTROL, R10 " );\
                          __asm ( " MOV R10, #0x01F " );\
                          __asm ( " MSR BASEPRI_MAX, R10  " ) ;\
                          __asm ( " MRS R10, CONTROL " ) ;\
-                         __asm ( " ORR R10, R10, #0x03 " ) ;\
+                         __asm ( " ORR R10, R10, #0x01 " ) ;\
                          __asm ( " MSR CONTROL, R10 " )
 
 
@@ -54,14 +51,10 @@
                         __asm ( " CPSID i " ) ;
 
 
-#define CS_OFF      \
-                   __asm ( " MRS R10, CONTROL " ) ;\
-                   __asm ( " BIC R10, R10, #0x02 " ) ;\
-                   __asm ( " MSR CONTROL, R10 " );\
-                   __asm ( " CPSIE i " ) ; \
-                   __asm ( " MRS R10, CONTROL " ) ;\
-                   __asm ( " ORR R10, R10, #0x03 " ) ;\
-                   __asm ( " MSR CONTROL, R10 " ) ;
+#define CS_OFF      __asm ( " CPSIE i " ) ; \
+                    __asm ( " MRS R10, CONTROL " ) ;\
+                    __asm ( " ORR R10, R10, #0x01 " ) ;\
+                    __asm ( " MSR CONTROL, R10 " )
 
 
 typedef struct

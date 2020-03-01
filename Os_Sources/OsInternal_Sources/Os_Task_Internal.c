@@ -309,9 +309,9 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 void OsTaskFrame (void)
 {
 
-
+    __asm ( " SVC #0x32 " ) ;
     __asm ( " MRS R10, CONTROL " ) ;
-    __asm ( " ORR R10, R10, #0x02 " ) ;
+    __asm ( " ORR R10, R10, #0x03 " ) ;
     __asm ( " MSR CONTROL, R10 " ) ;
 
     __asm ( " MOV PC, R11 " ) ;
