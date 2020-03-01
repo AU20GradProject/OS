@@ -27,6 +27,7 @@ FUNC(ISRType, AUTOMATIC) GetISRID( void ){
 
 /*This service restores the state saved by DisableAllInterrupts.*/
 FUNC(void, AUTOMATIC) EnableAllInterrupts(void){
+    CS_ON;
 /*
 * The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
 */
@@ -46,11 +47,13 @@ FUNC(void, AUTOMATIC) EnableAllInterrupts(void){
     	ActiveIsrDisable = NoDisableActive; /* cannot be interrupted after because interrupt is disabled.*/
     	__asm volatile (" CPSIE i");
 	}
+    CS_OFF;
     return;
 }
 
 /*This service disables all interrupts for which the hardware supports disabling. The state before is saved for the EnableAllInterrupts call.*/
 FUNC(void, AUTOMATIC) DisableAllInterrupts(void){
+    CS_ON;
     /*
     The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
     */
@@ -59,22 +62,24 @@ FUNC(void, AUTOMATIC) DisableAllInterrupts(void){
     This service is intended to start a critical section of the code. This section shall be finished by calling the EnableAllInterrupts service. No API service calls are allowed within this critical section.
     */
    
-   /*
-    The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service disables recognition of interrupts by the central processing unit.
-    Note that this service does not support nesting. If nesting is needed for critical sections e.g. for libraries SuspendOSInterrupts/ResumeOSInterrupts or SuspendAllInterrupt/ResumeAllInterrupts should be used.
-    */   
     if (ActiveIsrDisable != NoDisableActive){
         /* Error nesting is not supported*/
     }else{
+        /*
+         The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service disables recognition of interrupts by the central processing unit.
+         Note that this service does not support nesting. If nesting is needed for critical sections e.g. for libraries SuspendOSInterrupts/ResumeOSInterrupts or SuspendAllInterrupt/ResumeAllInterrupts should be used.
+         */
     	__asm volatile (" CPSID i");
     	ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
     }
+    CS_OFF;
     return;
 }
 /* The rest of the functions werenot implemented because we donot need them */
 
 /* This service restores the recognition status of all interrupts saved by the SuspendAllInterrupts service. */
 FUNC(void, AUTOMATIC) ResumeAllInterrupts(void){
+    CS_ON;
     /*
     The service may be called from an ISR category 1 and category 2, from alarm-callbacks and from the task level, but not from all hook routines.
     */
@@ -92,11 +97,13 @@ FUNC(void, AUTOMATIC) ResumeAllInterrupts(void){
     	ActiveIsrDisable = NoDisableActive;
     	__asm volatile (" CPSIE i");
 	}
+    CS_OFF;
 	return;
 }
 
 /*This service saves the recognition status of all interrupts and disables all interrupts for which the hardware supports disabling.*/
 FUNC(void, AUTOMATIC) SuspendAllInterrupts(void){ 
+    CS_ON;
     ActiveIsrDisable = SuspendAllIntActive;  
     /*
     The service may be called from an ISR category 1 and category 2, from alarm-callbacks and from the task level, but not from all hook routines.
@@ -107,9 +114,12 @@ FUNC(void, AUTOMATIC) SuspendAllInterrupts(void){
     /*
     The implementation should adapt this service to the target hardware providing a minimum overhead.
     */
+    CS_OFF;
+    return;
 }
 /*This service restores the recognition status of interrupts saved by the SuspendOSInterrupts service.*/
 FUNC(void, AUTOMATIC) ResumeOSInterrupts(void){
+    CS_ON;
     /*
     The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
     */
@@ -126,11 +136,13 @@ FUNC(void, AUTOMATIC) ResumeOSInterrupts(void){
     	ActiveIsrDisable = NoDisableActive; //can be nested, so how to know if nested or not and how many nests 
 	    __asm volatile (" CPSIE i");
 	}
+    CS_OFF;
 	return;
 }
 
 /* This service saves the recognition status of interrupts of category 2 and disables the recognition of these interrupts.*/
 FUNC(void, AUTOMATIC) SuspendOSInterrupts(void){
+    CS_ON;
     ActiveIsrDisable = SuspendOSIntActive;
     /*
     The service may be called from an ISR and from the task level, but not from hook routines.
@@ -142,5 +154,7 @@ FUNC(void, AUTOMATIC) SuspendOSInterrupts(void){
    The implementation should adapt this service to the target hardware providing a minimum overhead.
     It is intended only to disable interrupts of category 2. However, if this is not possible in an efficient way more interrupts may be disabled.
     */
+    CS_OFF;
+    return;
 }
 
