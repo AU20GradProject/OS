@@ -63,12 +63,12 @@
         },\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = {1,1},\
+            .PointTasks = {1,2},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = {1,1},\
+            .PointTasks = {1,3},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
 }
