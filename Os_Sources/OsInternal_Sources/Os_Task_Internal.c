@@ -309,6 +309,8 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 void OsTaskFrame (void)
 {
 
+    DispatcherLocal_Variable = 0 ;
+
     __asm ( " SVC #0x32 " ) ;
     __asm ( " MRS R10, CONTROL " ) ;
     __asm ( " ORR R10, R10, #0x03 " ) ;
