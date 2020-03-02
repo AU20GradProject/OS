@@ -45,9 +45,9 @@ FUNC(void, AUTOMATIC) EnableAllInterrupts(void){
 * The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service enables recognition of interrupts by the central processing unit.
 */
     	ActiveIsrDisable = NoDisableActive; /* cannot be interrupted after because interrupt is disabled.*/
-    	__asm volatile (" CPSIE i");
+//    	__asm volatile (" CPSIE i");
 	}
-    CS_OFF;
+    CS_OFF; /* disable critical section */
     return;
 }
 
@@ -64,19 +64,19 @@ FUNC(void, AUTOMATIC) DisableAllInterrupts(void){
    
     if (ActiveIsrDisable != NoDisableActive){
         /* Error nesting is not supported*/
+        CS_OFF;
     }else{
         /*
          The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service disables recognition of interrupts by the central processing unit.
          Note that this service does not support nesting. If nesting is needed for critical sections e.g. for libraries SuspendOSInterrupts/ResumeOSInterrupts or SuspendAllInterrupt/ResumeAllInterrupts should be used.
          */
-    	__asm volatile (" CPSID i");
+//    	__asm volatile (" CPSID i");
     	ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
     }
-    CS_OFF;
     return;
 }
 /* The rest of the functions werenot implemented because we donot need them */
-
+# if 0
 /* This service restores the recognition status of all interrupts saved by the SuspendAllInterrupts service. */
 FUNC(void, AUTOMATIC) ResumeAllInterrupts(void){
     CS_ON;
@@ -158,3 +158,4 @@ FUNC(void, AUTOMATIC) SuspendOSInterrupts(void){
     return;
 }
 
+#endif
