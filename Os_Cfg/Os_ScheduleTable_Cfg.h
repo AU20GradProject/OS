@@ -53,26 +53,22 @@
 {\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = 1,\
-            .PointEvents = 0,\
+            .PointTasks = {1,0},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = 1,\
-            .PointEvents = 0,\
+            .PointTasks = {1,1},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = 1,\
-            .PointEvents = 0,\
+            .PointTasks = {1,1},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
             .OsScheduleTblExpPointOffset = 1000,\
-            .PointTasks = 1,\
-            .PointEvents = 0,\
+            .PointTasks = {1,1},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
 }

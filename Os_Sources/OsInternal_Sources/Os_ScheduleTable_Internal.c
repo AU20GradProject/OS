@@ -67,7 +67,8 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
                 /* Task Activation */
 
                 for(pCounter = ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointTasks.FirstTaskActivation;
-                    pCounter < ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointTasks.TaskActivationNumber;
+                    pCounter < ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointTasks.FirstTaskActivation+
+                                ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointTasks.TaskActivationNumber;
                     pCounter++ )
                 {
                     ActivateTask(ScheduleTableTaskActivation_Array[pCounter]);
@@ -76,7 +77,8 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
 
                 /* Event Setting */
                 for(pCounter = ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointEvents.FirstEventSet;
-                    pCounter < ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointEvents.EventSetNumber;
+                    pCounter < ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointEvents.FirstEventSet +
+                               ScheduleTablePoints_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].PointEvents.EventSetNumber;
                     pCounter++ )
                 {
                     SetEvent(ScheduleTableTaskSet_Array[pCounter],ScheduleTableEventSet_Array[pCounter]);
