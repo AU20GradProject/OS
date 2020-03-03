@@ -30,7 +30,7 @@ extern VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES
 
 extern CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] ;
 
-
+extern CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ];
 
 /**************************************************************************************************/
 
@@ -52,6 +52,8 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
 
 
                     ScheduleTableInternal_Array[ScheduleTableInternal_Array[i].NextScheduleTable].CurrentState = SCHEDULETABLE_STOPPED;
+                    ScheduleTableInternal_Array[ScheduleTableInternal_Array[i].NextScheduleTable].CurrentExpiryPointIndex =
+                            ScheduleTable_Array[ScheduleTableInternal_Array[i].NextScheduleTable].FirstExpiryPoint;
                     StartScheduleTableRel( ScheduleTableInternal_Array[i].NextScheduleTable, 1 );
 
                 /* if repeating */
@@ -108,7 +110,6 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
             ScheduleTablePointsOffsets_Array[ScheduleTableInternal_Array[i].CurrentExpiryPointIndex].EPCurrentOffset--;
 
             ScheduleTableInternal_Array[i].ScheduleTableDuration--;
-
 
         }
 

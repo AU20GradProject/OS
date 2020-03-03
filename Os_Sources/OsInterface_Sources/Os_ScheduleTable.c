@@ -74,7 +74,7 @@ FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTable
            The state of <ScheduleTableID> is set to SCHEDULETABLE_RUNNING before the service returns to the caller. ( ) */
 
 
-        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
+        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber + ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint ; i++, j++){
 
             ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
             ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
@@ -136,7 +136,7 @@ FUNC(StatusType, OS_CODE) StartScheduleTableRel( ScheduleTableType ScheduleTable
 
         /* store the current value of the counter */
 
-        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
+        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber + ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint ; i++, j++){
 
             ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
             ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
@@ -209,7 +209,7 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
 
        }
 
-       for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
+       for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber + ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint ; i++, j++){
 
            ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
            ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
@@ -276,7 +276,7 @@ FUNC( StatusType, OS_CODE ) StartScheduleTableAbs( ScheduleTableType ScheduleTab
         }
 
 
-        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber ; i++, j++){
+        for(i = ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint, j = 0; i < ScheduleTable_Array[ScheduleTableID].ExpiryPointsNumber + ScheduleTable_Array[ScheduleTableID].FirstExpiryPoint ; i++, j++){
 
             ScheduleTablePointsOffsets_Array[i].EPCurrentOffset = Offset + ScheduleTablePoints_Array[j].OsScheduleTblExpPointOffset ;
             ScheduleTablePointsOffsets_Array[i].EPFullOffset = ScheduleTablePointsOffsets_Array[i].EPCurrentOffset;
