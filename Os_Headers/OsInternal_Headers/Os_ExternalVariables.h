@@ -120,6 +120,9 @@ extern CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] ;
 /* used to hold resource id of last resource occupied by isr */
 extern VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] ;
 
+/**************************************************************************/
+/* used to carry HOOK_ID of current runnign Hook routine */
+extern VAR( HOOKType, OS_VAR_CLEARED ) HookID ;
 
 /**************************************************************************/
 

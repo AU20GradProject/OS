@@ -113,7 +113,10 @@ CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] = OS_ISRS_OBJECT_CONG
 /* used to hold resource id of last resource occupied by isr */
 VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;
 
+/**************************************************************************/
 
+/* used to carry HOOK_ID of current runnign Hook routine */
+VAR( HOOKType, OS_VAR_CLEARED ) HookID = INVALID_HOOK ;
 
 /**************************************************************************/
 

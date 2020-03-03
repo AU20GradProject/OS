@@ -142,17 +142,17 @@ typedef VAR( uint8, TYPEDEF ) ISRType ;
 /* This service returns the identifier of the currently executing ISR.*/
 FUNC(ISRType, AUTOMATIC) GetISRID( void );
 /*This service restores the state saved by DisableAllInterrupts.*/
-FUNC(void, AUTOMATIC) EnableAllInterrupts(void);
+FUNC(StatusType, AUTOMATIC) EnableAllInterrupts(void);
 /*This service disables all interrupts for which the hardware supports disabling. The state before is saved for the EnableAllInterrupts call.*/
-FUNC(void, AUTOMATIC) DisableAllInterrupts(void);
+FUNC(StatusType, AUTOMATIC) DisableAllInterrupts(void);
 /* This service restores the recognition status of all interrupts saved by the SuspendAllInterrupts service. */
-FUNC(void, AUTOMATIC) ResumeAllInterrupts(void);
+FUNC(StatusType, AUTOMATIC) ResumeAllInterrupts(void);
 /*This service saves the recognition status of all interrupts and disables all interrupts for which the hardware supports disabling.*/
-FUNC(void, AUTOMATIC) SuspendAllInterrupts(void);
+FUNC(StatusType, AUTOMATIC) SuspendAllInterrupts(void);
 /*This service restores the recognition status of interrupts saved by the SuspendOSInterrupts service.*/
-FUNC(void, AUTOMATIC) ResumeOSInterrupts(void);
+FUNC(StatusType, AUTOMATIC) ResumeOSInterrupts(void);
 /* This service saves the recognition status of interrupts of category 2 and disables the recognition of these interrupts.*/
-FUNC(void, AUTOMATIC) SuspendOSInterrupts(void);
+FUNC(StatusType, AUTOMATIC) SuspendOSInterrupts(void);
 
 
 
