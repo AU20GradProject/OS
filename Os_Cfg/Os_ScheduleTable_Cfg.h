@@ -52,7 +52,7 @@
 #define OS_TABLESS_POINTS_OBJECT_CONGIFURATION \
 {\
         {\
-            .OsScheduleTblExpPointOffset = 1000,\
+            .OsScheduleTblExpPointOffset = 0,\
             .PointTasks = {1,0},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
@@ -62,7 +62,7 @@
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
-            .OsScheduleTblExpPointOffset = 1000,\
+            .OsScheduleTblExpPointOffset = 500,\
             .PointTasks = {1,2},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
