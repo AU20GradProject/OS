@@ -68,4 +68,8 @@ VAR(uint8, AUTOMATIC) suspendCount;
 
 /*******************************************************************/
 
+#define END_PRIVILEGE  __asm ( " MRS R10, CONTROL " ) ;\
+                       __asm ( " ORR R10, R10, #0x01 " ) ;\
+                       __asm ( " MSR CONTROL, R10 " )
+
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_ISR_INTERNAL_H_ */

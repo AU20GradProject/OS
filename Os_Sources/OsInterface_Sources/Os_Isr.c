@@ -64,13 +64,12 @@ FUNC(StatusType, AUTOMATIC) DisableAllInterrupts(void){
     /*
     The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
     */
-        // -----> @TODO CHECK IF CALLER IS NOT A HOOK ROUTINE 
-    /*
-    This service is intended to start a critical section of the code. This section shall be finished by calling the EnableAllInterrupts service. No API service calls are allowed within this critical section.
-    */
     if( HookID != INVALID_HOOK){
         status = E_NOT_OK;
         CS_OFF;
+    /*
+    This service is intended to start a critical section of the code. This section shall be finished by calling the EnableAllInterrupts service. No API service calls are allowed within this critical section.
+    */
     }else{ 
         if (ActiveIsrDisable != NoDisableActive){
             /* Error nesting is not supported*/
@@ -85,6 +84,7 @@ FUNC(StatusType, AUTOMATIC) DisableAllInterrupts(void){
             ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
         }
     }
+    END_PRIVILEGE;
     return status;
 }
 /* The rest of the functions werenot implemented because we donot need them */
@@ -130,6 +130,7 @@ FUNC(StatusType, AUTOMATIC) ResumeAllInterrupts(void){
             }
         }
     }
+    END_PRIVILEGE;
 	return status;
 }
 
@@ -167,6 +168,7 @@ FUNC(StatusType, AUTOMATIC) SuspendAllInterrupts(void){
             suspendCount++;
         }
     }
+    END_PRIVILEGE;
     return status;
 }
 /*This service restores the recognition status of interrupts saved by the SuspendOSInterrupts service.*/
@@ -210,6 +212,7 @@ FUNC(StatusType, AUTOMATIC) ResumeOSInterrupts(void){
             }
         }
     }
+    END_PRIVILEGE;
 	return status;
 }
 
@@ -249,5 +252,6 @@ FUNC(StatusType, AUTOMATIC) SuspendOSInterrupts(void){
             suspendCount++;
         }
     }
+    END_PRIVILEGE;
     return status;
 }
