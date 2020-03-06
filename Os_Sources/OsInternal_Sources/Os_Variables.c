@@ -15,8 +15,6 @@
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
 
 /**************************************************************************/
-/* used to hold pc of tasks which will be called inside task frame */
-P2FUNC( void, OS_VAR_CLEARED, OsTaskCode_Ptr ) (void)  ;
 
 /* used for define OS object in the system */
 CONST( OsOS, OS_CONFIG_DATA ) OS = OS_OS_OBJECT_CONGIFURATION ;
@@ -53,9 +51,8 @@ VAR ( uint16, OS_VAR_CLEARED) CriticalSection_Semaphore ;
 /* used to take a copy of ReadyTaskPCB_Index inside dispatcher */
 VAR ( uint8, OS_VAR_CLEARED ) DispatcherLocal_Variable ;
 
-
-
-
+/* used to indicate privilege of running task */
+VAR ( uint8, OS_VAR_CLEARED ) OsTask_PrivilegeFlag ;
 
 /**************************************************************************/
 
@@ -97,7 +94,11 @@ VAR ( uint8, OS_VAR_INIT ) ReadyTaskPCB_Index = INVALID_TASK ;
 VAR ( uint8, OS_VAR_INIT ) RunningTaskPCB_Index = INVALID_TASK ;
 
 /* used in context swithcing and preemption to easily modify value of stack frame */
-volatile CONSTP2VAR ( OsStackFrame, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr = OS_MSP_STACK_FRAME_ADDRESS ;
+volatile CONSTP2VAR ( OsStackFrame_MSP, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr = OS_MSP_STACK_FRAME_ADDRESS ;
+
+/* used in context swithcing and preemption to easily modify value of stack frame */
+volatile P2VAR ( OsStackFrame_PSP, OS_VAR_CLEARED, OS_APPL_CONST ) OsPSP_StackFrame_ptr  ;
+
 
 VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 

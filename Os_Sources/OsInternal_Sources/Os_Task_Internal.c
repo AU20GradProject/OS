@@ -18,9 +18,8 @@
 /*****************************************************************************/
 
 /* choose next task to run and make context switching */
-void OsDispatcher (void)
+FUNC (void, OS_CODE) OsDispatcher (void)
 {
-
 
     if ( INVALID_TASK != RunningTaskPCB_Index )/* case there's preemption to running task */
     {
@@ -37,7 +36,11 @@ void OsDispatcher (void)
         __asm ( " PUSH {R9} " ) ;
         __asm ( " PUSH {R10} " ) ;
         __asm ( " PUSH {R11} " ) ;
+        __asm ( " MRS R12, CONTROL " ) ;
+        __asm ( " PUSH {R12} " ) ;
 
+
+        OsPSP_StackFrame_ptr = (( ( volatile P2VAR( OsStackFrame_PSP, AUTOMATIC, REGSPACE ) ) (OsMSP_StackFrame_ptr->PSP) ) ) ;
 
 
         /* save context of preempted task */
@@ -46,17 +49,17 @@ void OsDispatcher (void)
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_State = READY ;
 
         /* save processor states of preempted task in its pcb, this states are pushed in main stack when exception of task context switching (PendSV) is triggered */
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_PSR = OsMSP_StackFrame_ptr->PSR ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_PC = OsMSP_StackFrame_ptr->PC ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_LR = OsMSP_StackFrame_ptr->LR ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R12 = OsMSP_StackFrame_ptr->R12 ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R3 = OsMSP_StackFrame_ptr->R3 ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R2 = OsMSP_StackFrame_ptr->R2 ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R1 = OsMSP_StackFrame_ptr->R1 ;
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R0 = OsMSP_StackFrame_ptr->R0 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_PSR = OsPSP_StackFrame_ptr->PSR ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_PC = OsPSP_StackFrame_ptr->PC ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_LR = OsPSP_StackFrame_ptr->LR ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R12 = OsPSP_StackFrame_ptr->R12 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R3 = OsPSP_StackFrame_ptr->R3 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R2 = OsPSP_StackFrame_ptr->R2 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R1 = OsPSP_StackFrame_ptr->R1 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R0 = OsPSP_StackFrame_ptr->R0 ;
 
         /* this registers are pushed manually */
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_SP = OsMSP_StackFrame_ptr->PSP ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_SP = OsMSP_StackFrame_ptr->PSP + 0x020u  ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R4 = OsMSP_StackFrame_ptr->R4 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R5 = OsMSP_StackFrame_ptr->R5 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R6 = OsMSP_StackFrame_ptr->R6 ;
@@ -65,6 +68,7 @@ void OsDispatcher (void)
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R9 = OsMSP_StackFrame_ptr->R9 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R10 = OsMSP_StackFrame_ptr->R10 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R11 = OsMSP_StackFrame_ptr->R11 ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_CONTROL = OsMSP_StackFrame_ptr->CONTROL ;
 
 
         OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = PreemptionPriority ;
@@ -77,7 +81,7 @@ void OsDispatcher (void)
 
     if ( INVALID_TASK != ReadyHighestPriority ) /* case there's tasks could enter running state */
     {
-        __asm ( " MOV R12, #0x7FB4 " ) ;
+        __asm ( " MOV R12, #0x7FD0 " ) ;
         __asm( " MOVT R12, #0x2000 " ) ;
         __asm ( " MSR MSP, R12 " ) ;
 
@@ -86,13 +90,13 @@ void OsDispatcher (void)
 
         DispatcherLocal_Variable = ReadyTaskPCB_Index ;
         PreemptionPriority = OsTasks_Array[ ( OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_ID ) ].OsTaskCeillingPriority_Internal ;
-
         __asm ( " CPSIE i " ) ;
 
         /* write values of next running task into stack to be popped into registers */
 
         /* popped manually by code */
-        OsMSP_StackFrame_ptr->R11 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R11 ;
+        OsMSP_StackFrame_ptr->CONTROL =  OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_CONTROL ;
+        OsMSP_StackFrame_ptr->R11 =  OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R11 ;
         OsMSP_StackFrame_ptr->R10 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R10 ;
         OsMSP_StackFrame_ptr->R9 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R9 ;
         OsMSP_StackFrame_ptr->R8 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R8 ;
@@ -100,21 +104,17 @@ void OsDispatcher (void)
         OsMSP_StackFrame_ptr->R6 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R6 ;
         OsMSP_StackFrame_ptr->R5 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R5 ;
         OsMSP_StackFrame_ptr->R4 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R4 ;
-        OsMSP_StackFrame_ptr->PSP = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_SP ;
+        OsMSP_StackFrame_ptr->PSP = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_SP - 0x020u ;
 
-        /* will be popped automatically in exception return */
-        OsMSP_StackFrame_ptr->R0 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R0 ;
-        OsMSP_StackFrame_ptr->R1 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R1 ;
-        OsMSP_StackFrame_ptr->R2 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R2 ;
-        OsMSP_StackFrame_ptr->R3 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R3 ;
-        OsMSP_StackFrame_ptr->R12 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R12 ;
-        OsMSP_StackFrame_ptr->LR = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_LR ;
-        OsMSP_StackFrame_ptr->PC = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_PC ;
-        OsMSP_StackFrame_ptr->PSR = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_PSR ;
-
+        OsPSP_StackFrame_ptr = (( ( volatile P2VAR( OsStackFrame_PSP, AUTOMATIC, REGSPACE ) ) (OsMSP_StackFrame_ptr->PSP) ) ) ;
 
 
         /* manual pop for special register ready task */
+
+
+        __asm ( " POP {R12} " ) ;
+        __asm ( " MSR CONTROL, R12 " ) ;
+
         __asm ( " POP {R11} " ) ;
         __asm ( " POP {R10} " ) ;
         __asm ( " POP {R9} " ) ;
@@ -128,8 +128,15 @@ void OsDispatcher (void)
         __asm ( " MSR PSP, R12 " ) ;
 
 
-
-
+        /* will be popped automatically in exception return */
+        OsPSP_StackFrame_ptr->R0 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R0 ;
+        OsPSP_StackFrame_ptr->R1 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R1 ;
+        OsPSP_StackFrame_ptr->R2 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R2 ;
+        OsPSP_StackFrame_ptr->R3 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R3 ;
+        OsPSP_StackFrame_ptr->R12 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R12 ;
+        OsPSP_StackFrame_ptr->LR = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_LR ;
+        OsPSP_StackFrame_ptr->PC = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_PC ;
+        OsPSP_StackFrame_ptr->PSR = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_PSR ;
 
         /* change index of running task pcb and change state for running task */
         RunningTaskPCB_Index = DispatcherLocal_Variable ;
@@ -149,7 +156,7 @@ void OsDispatcher (void)
 
 /* add/remove PCB which have index PCB_Index to/from proper priority queue and call disaptacher if preemption needed
  * add or removing depend on AddToQueue parameter if TRUE then add if false then remove */
-void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
+FUNC (void, OS_CODE) OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 {
 
     VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[ PCB_Index ].Task_Priority ;
@@ -291,12 +298,10 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 
         }  /* else */
 
-
         DISPATCHER_CALL ;
 
 
     } /* else */
-
 
     return ;
 }
@@ -304,20 +309,4 @@ void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
 
 
 /*****************************************************************************/
-
-
-void OsTaskFrame (void)
-{
-
-    DispatcherLocal_Variable = 0 ;
-
-    __asm ( " SVC #0x32 " ) ;
-    __asm ( " MRS R10, CONTROL " ) ;
-    __asm ( " ORR R10, R10, #0x03 " ) ;
-    __asm ( " MSR CONTROL, R10 " ) ;
-
-    __asm ( " MOV PC, R11 " ) ;
-
-    return ;
-}
 

@@ -68,6 +68,9 @@ FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID )
                 OsTasksPCB_Array[LocalCounter].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[LocalCounter].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[LocalCounter].Task_PC = OsTasksNames_Array[TaskID] ;
+                OsTasksPCB_Array[LocalCounter].Task_CONTROL = 0x01u ;
+                OsTasksPCB_Array[LocalCounter].Task_R9 = 0x00u ;
+
 
                 /* add new task's pcb index to proper priority queue*/
                 OsInternalScheduler ( LocalCounter, TRUE ) ;
@@ -165,10 +168,12 @@ FUNC (StatusType, OS_CODE) TerminateTask ( void )
                 /* initialize task PCB */
 
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_State = READY ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [0 ] )) ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [TASK_STACK_SIZE] )) ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PC = OsTasksNames_Array[ (OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ] ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_CONTROL = 0x01u ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_R9 = 0x00u ;
 
                 /* release its internal resource */
                 OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = FALSE ;

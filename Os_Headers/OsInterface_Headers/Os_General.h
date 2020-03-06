@@ -45,12 +45,12 @@ AppModeType GetActiveApplicationMode ( void ) ;
 /*********************************************************************************************************/
 
 /* The user can call this system service to start the operating system in a specific mode */
-void StartOS ( AppModeType Mode ) ;
+FUNC (void, OS_CODE) StartOS ( AppModeType Mode ) ;
 
 
 /*********************************************************************************************************/
 
-void ShutdownOS ( StatusType Error ) ;
+FUNC (void, OS_CODE) ShutdownOS ( StatusType Error ) ;
 
 /*********************************************************************************************************/
 

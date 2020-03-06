@@ -11,6 +11,10 @@
 #ifndef OS_HEADERS_OSINTERNAL_HEADERS_OS_TASK_INTERNAL_H_
 #define OS_HEADERS_OSINTERNAL_HEADERS_OS_TASK_INTERNAL_H_
 
+
+/*****************************************************************************/
+
+
 /* used for initialize all elements of array with value x */
 #define VAL_1(x)        x
 #define VAL_2(x)        VAL_1(x), VAL_1(x)
@@ -23,8 +27,7 @@
 #define VAL_256(x)      VAL_128(x), VAL_128(x)
 
 
-
-
+/*****************************************************************************/
 /* set pending bit of PendSv exception and set stack pointer to MSP */
 
 #define DISPATCHER_CALL *( ( volatile P2VAR( uint32, AUTOMATIC, REGSPACE ) ) 0xE000ED04 ) |= ( 0x01u << 28 )
@@ -32,22 +35,22 @@
 
 
 /* set BASEPRI priority to be 7 to disable dispatcher*/
-#define DISPATCHER_OFF  __asm ( " SVC #0x32 " ) ; \
-                        __asm ( " MOV R10, #0x0E0u " ) ;\
-                        __asm ( " MSR BASEPRI_MAX, R10 " )
+#define DISPATCHER_OFF  __asm ( " SVC #0x00 " ) ; \
+                        __asm ( " MOV R11, #0x0E0u " ) ;\
+                        __asm ( " MSR BASEPRI, R11 " )
 
 
 /* befor convert to dipatcher make stack pointer for MSP*/
-#define DISPATCHER_ON    __asm ( " SVC #0x32 " ) ; \
-                         __asm ( " MOV R10, #0x01F " );\
-                         __asm ( " MSR BASEPRI_MAX, R10  " ) ;\
+#define DISPATCHER_ON    __asm ( " SVC #0x00 " ) ; \
+                         __asm ( " MOV R11, #0x00 " );\
+                         __asm ( " MSR BASEPRI, R11  " ) ;\
                          __asm ( " MRS R10, CONTROL " ) ;\
                          __asm ( " ORR R10, R10, #0x01 " ) ;\
                          __asm ( " MSR CONTROL, R10 " )
 
 
 /* set and clear PRIMASK register*/
-#define CS_ON           __asm ( " SVC #0x32 " ) ; \
+#define CS_ON           __asm ( " SVC #0x00 " ) ; \
                         __asm ( " CPSID i " ) ;
 
 
@@ -55,6 +58,8 @@
                     __asm ( " MRS R10, CONTROL " ) ;\
                     __asm ( " ORR R10, R10, #0x01 " ) ;\
                     __asm ( " MSR CONTROL, R10 " )
+
+/*****************************************************************************/
 
 
 typedef struct
@@ -85,8 +90,15 @@ typedef struct
 } OsTask ;
 
 
+
+/*****************************************************************************/
+
+
 typedef struct
 {
+
+    VAR( boolean, AUTOMATIC ) Task_PrivilegeFlag ;
+
     /* variable to carry number of multiple activation requested for basic tasks
      * at every activate will be decremented if not equeal to zero
      * initialized from configuration task array */
@@ -134,6 +146,12 @@ typedef struct
     /* status register for task */
     VAR( uint32, AUTOMATIC ) Task_PSR ;
 
+    /* control register for task to save privilege level */
+    VAR( uint32, AUTOMATIC ) Task_CONTROL ;
+
+    /* basepri register for task */
+    VAR( uint32, AUTOMATIC ) Task_BASEPRI ;
+
     /* flags determine states of the task set or cleared */
     VAR( EventMaskType, AUTOMATIC ) Task_EvnetsFlag ;
 
@@ -145,11 +163,16 @@ typedef struct
 } OsTask_PCB ;
 
 
+/*****************************************************************************/
+
+
 /* used to reference stack frame in case of interrupt
  * to easily access the element that pushed to main stack for context switching  */
 typedef struct
 {
+
     /* this registers are pushed manually */
+    VAR (uint32, AUTOMATIC) CONTROL ;
     VAR (uint32, AUTOMATIC) R11 ;
     VAR (uint32, AUTOMATIC) R10 ;
     VAR (uint32, AUTOMATIC) R9 ;
@@ -164,6 +187,15 @@ typedef struct
     VAR (uint32, AUTOMATIC) emp_2 ;
 
 
+} OsStackFrame_MSP;
+
+
+/*****************************************************************************/
+
+
+typedef struct
+{
+
     /* this register are pushed by exception entry automatically */
     VAR (uint32, AUTOMATIC) R0 ;
     VAR (uint32, AUTOMATIC) R1 ;
@@ -174,10 +206,10 @@ typedef struct
     P2FUNC( void, AUTOMATIC, PC ) (void)  ;
     VAR (uint32, AUTOMATIC) PSR ;
 
-} OsStackFrame;
+} OsStackFrame_PSP ;
 
 
-
+/*****************************************************************************/
 
 
 /* make context switching */
@@ -186,12 +218,6 @@ void OsDispatcher (void) ;
 /* add/remove PCB which have index PCB_Index to/from proper priority queue and call disaptacher if preemption needed
  * add or rempoving depend on AddToQueue parameter if TRUE then add if false then remove */
 void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue ) ;
-
-
-/* used to execute code before calling tasks code
- * executed code will initialize stack pointer */
-void OsTaskFrame (void) ;
-
 
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_TASK_INTERNAL_H_ */
