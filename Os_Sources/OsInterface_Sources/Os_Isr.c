@@ -17,7 +17,7 @@
 #include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
 
 /* This service returns the identifier of the currently executing ISR.*/
-FUNC(ISRType, AUTOMATIC) GetISRID( void ){
+FUNC(ISRType, OS_CODE) GetISRID( void ){
     /*
     [SWS_Os_00263] If called from category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return the identifier of the currently executing ISR.
     [SWS_Os_00264] If its caller is not a category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return INVALID_ISR.
@@ -26,7 +26,7 @@ FUNC(ISRType, AUTOMATIC) GetISRID( void ){
 }
 
 /*This service restores the state saved by DisableAllInterrupts.*/
-FUNC(StatusType, AUTOMATIC) EnableAllInterrupts(void){
+FUNC(StatusType, OS_CODE) EnableAllInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
 /*
@@ -57,7 +57,7 @@ FUNC(StatusType, AUTOMATIC) EnableAllInterrupts(void){
 }
 
 /*This service disables all interrupts for which the hardware supports disabling. The state before is saved for the EnableAllInterrupts call.*/
-FUNC(StatusType, AUTOMATIC) DisableAllInterrupts(void){
+FUNC(StatusType, OS_CODE) DisableAllInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
     
@@ -90,7 +90,7 @@ FUNC(StatusType, AUTOMATIC) DisableAllInterrupts(void){
 /* The rest of the functions werenot implemented because we donot need them */
 
 /* This service restores the recognition status of all interrupts saved by the SuspendAllInterrupts service. */
-FUNC(StatusType, AUTOMATIC) ResumeAllInterrupts(void){
+FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
 
@@ -135,7 +135,7 @@ FUNC(StatusType, AUTOMATIC) ResumeAllInterrupts(void){
 }
 
 /*This service saves the recognition status of all interrupts and disables all interrupts for which the hardware supports disabling.*/
-FUNC(StatusType, AUTOMATIC) SuspendAllInterrupts(void){ 
+FUNC(StatusType, OS_CODE) SuspendAllInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
     /*
@@ -172,7 +172,7 @@ FUNC(StatusType, AUTOMATIC) SuspendAllInterrupts(void){
     return status;
 }
 /*This service restores the recognition status of interrupts saved by the SuspendOSInterrupts service.*/
-FUNC(StatusType, AUTOMATIC) ResumeOSInterrupts(void){
+FUNC(StatusType, OS_CODE) ResumeOSInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
     /*
@@ -217,7 +217,7 @@ FUNC(StatusType, AUTOMATIC) ResumeOSInterrupts(void){
 }
 
 /* This service saves the recognition status of interrupts of category 2 and disables the recognition of these interrupts.*/
-FUNC(StatusType, AUTOMATIC) SuspendOSInterrupts(void){
+FUNC(StatusType, OS_CODE) SuspendOSInterrupts(void){
     CS_ON;
     StatusType status = E_OK;
     ActiveIsrDisable = SuspendOSIntActive;

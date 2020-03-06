@@ -172,14 +172,18 @@ CONST( OsScheduleTable, OS_CONFIG_DATA ) ScheduleTable_Array [ TABLES_NUMBER ] =
 
 VAR( OsScheduleTableInternal, OS_DATA ) ScheduleTableInternal_Array [ TABLES_NUMBER ] ;
 
+/* define configuration of expiry points in system */
 CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] = OS_TABLESS_POINTS_OBJECT_CONGIFURATION ;
 
 VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
 
+/* define configuration of tasks to be activated by tables in system */
 CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] = OS_TABLESS_TASKS_OBJECT_CONGIFURATION ;
 
+/* define configuration of tasks to be set its events by tables in system */
 CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_TASKS_SET_OBJECT_CONGIFURATION ;
 
+/* define configuration of events to be set by tables in system */
 CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION ;
 
 /**************************************************************************/

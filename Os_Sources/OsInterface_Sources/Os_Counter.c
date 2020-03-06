@@ -149,7 +149,7 @@ FUNC( StatusType, OS_CODE) GetElapsedValue( CounterType CounterID, TickRefType V
 
 /*************************************************************************************************/
 
-FUNC(void, ISR_CODE) SysTick_Handler(void)
+FUNC(void, OS_CODE) SysTick_Handler(void)
 {
 
     uint8 i;

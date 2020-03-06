@@ -26,9 +26,6 @@
 #include "Os_ScheduleTable.h"
 #include "../OsInternal_Headers/Os_Gpt_Internal.h" /* used in testing the OS in main function */ 
 
-#define INVALID_HOOK 0xFFU
-/* enum data type identifies an Hook routine. */
-typedef VAR( uint8, TYPEDEF ) HOOKType ;
 
 
 

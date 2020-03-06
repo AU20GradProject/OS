@@ -26,7 +26,7 @@ AppModeType GetActiveApplicationMode ( void )
 
 
 /* The user can call this system service to start the operating system in a specific mode */
-void StartOS ( AppModeType Mode )
+FUNC (void, OS_CODE) StartOS ( AppModeType Mode )
 {
     VAR ( uint16, AUTOMATIC ) LocalTemp = 0 ;
     VAR ( uint16, AUTOMATIC ) LocalCounter = 0 ;
@@ -141,7 +141,7 @@ void StartOS ( AppModeType Mode )
 /* user can call this system service to abort the overall system (e.g. emergency off).
  * The operating system also calls this function internally,
  *  if it has reached an undefined internal state and is no longer ready to run.    */
-void ShutdownOS ( StatusType Error )
+FUNC (void, OS_CODE) ShutdownOS ( StatusType Error )
 {
 
     CS_ON ;

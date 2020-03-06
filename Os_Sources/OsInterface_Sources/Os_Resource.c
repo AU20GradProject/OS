@@ -33,7 +33,7 @@
 /* Resource <ResID> is invalid, E_OS_ID */
 /* get a resource which is already occupied by any task or ISR, or the statically assigned priority of the calling task or
  interrupt routine is higher than the calculated ceiling priority, E_OS_ACCESS*/
-StatusType GetResource ( ResourceType ResID )
+FUNC (StatusType, OS_CODE) GetResource ( ResourceType ResID )
 {
     CS_ON ;
 
@@ -209,7 +209,7 @@ StatusType GetResource ( ResourceType ResID )
 /* Attempt to release a resource which is not occupied by any task or ISR, or another resource shall be released before, E_OS_NOFUNC */
 /* Attempt to release a resource which has a lower ceiling priority than
  * the statically assigned priority of the calling task or interrupt routine, E_OS_ACCESS */
-StatusType ReleaseResource ( ResourceType ResID )
+FUNC (StatusType, OS_CODE) ReleaseResource ( ResourceType ResID )
 {
     CS_ON ;
 
