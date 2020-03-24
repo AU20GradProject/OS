@@ -61,7 +61,7 @@
 /**************************************************************************/
 
 /* where 0x2000.8000 is the adress of MSP which loaded form top of vector table */
-#define OS_MSP_STACK_FRAME_ADDRESS  (( ( volatile P2VAR( OsStackFrame, AUTOMATIC, REGSPACE ) ) 0x20008000 ) - 1 )
+#define OS_MSP_STACK_FRAME_ADDRESS  (( ( volatile P2VAR( OsStackFrame_MSP, AUTOMATIC, REGSPACE ) ) 0x20008000 ) - 1 )
 
 
 /**************************************************************************/

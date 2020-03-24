@@ -44,7 +44,7 @@ typedef P2VAR( TaskStateType, TYPEDEF, TYPEDEF ) TaskStateRefType ;
  * Too many task activations of <TaskID>, E_OS_LIMIT
  * Task <TaskID> is invalid, E_OS_ID */
 
-StatusType ActivateTask ( TaskType TaskID ) ;
+FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID ) ;
 
 /*****************************************************************************/
 
@@ -55,12 +55,12 @@ StatusType ActivateTask ( TaskType TaskID ) ;
  * Task still occupies resources, E_OS_RESOURCE
  * Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType TerminateTask ( void ) ;
+FUNC (StatusType, OS_CODE) TerminateTask ( void ) ;
 
 /*****************************************************************************/
 
 
-StatusType ChainTask ( TaskType TaskID ) ;
+FUNC (StatusType, OS_CODE) ChainTask ( TaskType TaskID ) ;
 
 /*****************************************************************************/
 
@@ -72,7 +72,7 @@ StatusType ChainTask ( TaskType TaskID ) ;
  * higher priority than the priority of the calling task */
 /* when call internal resource is released and context switching happen to highest priority task */
 
-StatusType Schedule ( void ) ;
+FUNC (StatusType, OS_CODE) Schedule ( void ) ;
 
 /*****************************************************************************/
 
@@ -80,7 +80,7 @@ StatusType Schedule ( void ) ;
 /* GetTaskID returns the information about the TaskID of the task which is currently running */
 /* If <TaskID> can’t be evaluated (no task currently running), the service returns INVALID_TASK as TaskType */
 
-StatusType GetTaskID ( TaskRefType TaskID ) ;
+FUNC (StatusType, OS_CODE) GetTaskID ( TaskRefType TaskID ) ;
 
 /*****************************************************************************/
 
@@ -88,7 +88,7 @@ StatusType GetTaskID ( TaskRefType TaskID ) ;
 /* When a call is made from a task in a full preemptive system, the result may already be incorrect at the time of evaluation */
 /* Task <TaskID> is invalid, E_OS_ID */
 
-StatusType GetTaskState ( TaskType TaskID, TaskStateRefType State ) ;
+FUNC (StatusType, OS_CODE) GetTaskState ( TaskType TaskID, TaskStateRefType State ) ;
 
 /*****************************************************************************/
 

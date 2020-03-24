@@ -29,7 +29,7 @@ typedef P2VAR ( EventMaskType, TYPEDEF, TYPEDEF ) EventMaskRefType ;
 /*  Referenced task is no extended task, E_OS_ACCESS */
 /* Events can not be set as the referenced task is in the suspended state, E_OS_STATE */
 
-StatusType SetEvent ( TaskType TaskID, EventMaskType Mask ) ;
+FUNC (StatusType, OS_CODE) SetEvent ( TaskType TaskID, EventMaskType Mask ) ;
 
 /*****************************************************************************/
 
@@ -38,7 +38,7 @@ StatusType SetEvent ( TaskType TaskID, EventMaskType Mask ) ;
 /* The system service ClearEvent is restricted to extended tasks which own the event */
 /* Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType ClearEvent ( EventMaskType Mask ) ;
+FUNC (StatusType, OS_CODE) ClearEvent ( EventMaskType Mask ) ;
 
 /*****************************************************************************/
 
@@ -49,7 +49,7 @@ StatusType ClearEvent ( EventMaskType Mask ) ;
 /* Referenced task <TaskID> is not an extended task, E_OS_ACCESS */
 /* Referenced task <TaskID> is in the suspended state, E_OS_STATE */
 
-StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event ) ;
+FUNC (StatusType, OS_CODE) GetEvent ( TaskType TaskID, EventMaskRefType Event ) ;
 
 /*****************************************************************************/
 
@@ -61,7 +61,7 @@ StatusType GetEvent ( TaskType TaskID, EventMaskRefType Event ) ;
 /* Calling task occupies resources, E_OS_RESOURCE */
 /* Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType WaitEvent ( EventMaskType Mask ) ;
+FUNC (StatusType, OS_CODE) WaitEvent ( EventMaskType Mask ) ;
 
 /*****************************************************************************/
 

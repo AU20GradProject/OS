@@ -24,7 +24,7 @@
  * No error, E_OK
  * Too many task activations of <TaskID>, E_OS_LIMIT
  * Task <TaskID> is invalid, E_OS_ID */
-StatusType ActivateTask ( TaskType TaskID )
+FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID )
 {
     CS_ON ;
 
@@ -68,6 +68,9 @@ StatusType ActivateTask ( TaskType TaskID )
                 OsTasksPCB_Array[LocalCounter].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[LocalCounter].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[LocalCounter].Task_PC = OsTasksNames_Array[TaskID] ;
+                OsTasksPCB_Array[LocalCounter].Task_CONTROL = 0x01u ;
+                OsTasksPCB_Array[LocalCounter].Task_R9 = 0x00u ;
+
 
                 /* add new task's pcb index to proper priority queue*/
                 OsInternalScheduler ( LocalCounter, TRUE ) ;
@@ -126,7 +129,7 @@ StatusType ActivateTask ( TaskType TaskID )
  * Task still occupies resources, E_OS_RESOURCE
  * Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType TerminateTask ( void )
+FUNC (StatusType, OS_CODE) TerminateTask ( void )
 {
 
     CS_ON ;
@@ -165,10 +168,12 @@ StatusType TerminateTask ( void )
                 /* initialize task PCB */
 
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_State = READY ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [0 ] )) ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [TASK_STACK_SIZE] )) ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_LR = 0xFFFFFFFD ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PSR = 0x01000000 ;
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_PC = OsTasksNames_Array[ (OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ] ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_CONTROL = 0x01u ;
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_R9 = 0x00u ;
 
                 /* release its internal resource */
                 OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = FALSE ;
@@ -222,7 +227,7 @@ StatusType TerminateTask ( void )
 /* Calling task still occupies resources, E_OS_RESOURCE */
 /* Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType ChainTask ( TaskType TaskID )
+FUNC (StatusType, OS_CODE) ChainTask ( TaskType TaskID )
 {
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
 
@@ -255,7 +260,7 @@ StatusType ChainTask ( TaskType TaskID )
 /* Calling task occupies resources, E_OS_RESOURCE */
 /* Call at interrupt level, E_OS_CALLEVEL */
 
-StatusType Schedule ( void )
+FUNC (StatusType, OS_CODE) Schedule ( void )
 {
     CS_ON ;
 
@@ -299,7 +304,7 @@ StatusType Schedule ( void )
 /* GetTaskID returns the information about the TaskID of the task which is currently running */
 /* If <TaskID> can’t be evaluated (no task currently running), the service returns INVALID_TASK as TaskType */
 
-StatusType GetTaskID ( TaskRefType TaskID )
+FUNC (StatusType, OS_CODE) GetTaskID ( TaskRefType TaskID )
 {
     if( INVALID_TASK == RunningTaskPCB_Index )
     {
@@ -318,7 +323,7 @@ StatusType GetTaskID ( TaskRefType TaskID )
 /* When a call is made from a task in a full preemptive system, the result may already be incorrect at the time of evaluation */
 /* Task <TaskID> is invalid, E_OS_ID */
 
-StatusType GetTaskState ( TaskType TaskID, TaskStateRefType State )
+FUNC (StatusType, OS_CODE) GetTaskState ( TaskType TaskID, TaskStateRefType State )
 {
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
 

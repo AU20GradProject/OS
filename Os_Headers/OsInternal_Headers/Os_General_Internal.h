@@ -46,4 +46,12 @@ typedef struct
 }OsAppMode ;
 
 
+/*******************************************************************/
+
+
+#define INVALID_HOOK 0xFFU
+
+/* enum data type identifies an Hook routine. */
+typedef VAR( uint8, TYPEDEF ) HOOKType ;
+
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_GENERAL_INTERNAL_H_ */

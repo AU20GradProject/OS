@@ -19,11 +19,6 @@ extern CONSTP2FUNC( void, OS_CONFIG_DATA, OsTasksNames_Array [TASKS_NUMBER] ) (v
 
 
 /**************************************************************************/
-
-/* used to hold pc of tasks which will be called inside task frame */
-extern P2FUNC( void, OS_VAR_CLEARED, OsTaskCode_Ptr ) (void)  ;
-
-
 /* used for define OS object in the system */
 extern CONST( OsOS, OS_CONFIG_DATA ) OS ;
 
@@ -54,8 +49,12 @@ extern VAR( AppModeType, OS_CONFIG_DATA )  AppMode ;
 
 /* used to insure that nested critical section will be in right way */
 extern VAR ( uint16, OS_VAR_CLEARED) CriticalSection_Semaphore ;
+
 /* used to take a copy of ReadyTaskPCB_Index inside dispatcher */
 extern VAR ( uint8, OS_VAR_CLEARED ) DispatcherLocal_Variable ;
+
+/* used to indicate privilege of running task */
+extern VAR ( uint8, OS_VAR_CLEARED ) OsTask_PrivilegeFlag ;
 
 /**************************************************************************/
 
@@ -102,7 +101,10 @@ extern VAR ( uint8, OS_VAR_INIT ) ReadyTaskPCB_Index ;
 extern VAR ( uint8, OS_VAR_INIT ) RunningTaskPCB_Index ;
 
 /* used in context swithcing and preemption to easily modify value of stack frame */
-extern volatile CONSTP2VAR ( OsStackFrame, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr ;
+extern volatile CONSTP2VAR ( OsStackFrame_MSP, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr ;
+
+/* used in context swithcing and preemption to easily modify value of stack frame */
+extern volatile P2VAR ( OsStackFrame_PSP, OS_VAR_CLEARED, OS_APPL_CONST ) OsPSP_StackFrame_ptr  ;
 
 extern VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 
@@ -120,6 +122,9 @@ extern CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] ;
 /* used to hold resource id of last resource occupied by isr */
 extern VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] ;
 
+/**************************************************************************/
+/* used to carry HOOK_ID of current runnign Hook routine */
+extern VAR( HOOKType, OS_VAR_CLEARED ) HookID ;
 
 /**************************************************************************/
 
@@ -163,7 +168,7 @@ extern CONST( OsScheduleTable, OS_CONFIG_DATA ) ScheduleTable_Array [ TABLES_NUM
 extern CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] ;
 
 /* define configuration of tasks to be activated by tables in system */
-extern CONST( TaskType, OS_CONFIG_DATA ) j [ TABLES_TASKS_NUMBER ] ;
+extern CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] ;
 
 /* define configuration of tasks to be set its events by tables in system */
 extern CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET_NUMBER ] ;

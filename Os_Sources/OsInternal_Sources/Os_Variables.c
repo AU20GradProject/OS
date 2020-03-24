@@ -15,8 +15,6 @@
 #include "..\..\Os_Headers\OsInternal_Headers\Os_Internal.h"
 
 /**************************************************************************/
-/* used to hold pc of tasks which will be called inside task frame */
-P2FUNC( void, OS_VAR_CLEARED, OsTaskCode_Ptr ) (void)  ;
 
 /* used for define OS object in the system */
 CONST( OsOS, OS_CONFIG_DATA ) OS = OS_OS_OBJECT_CONGIFURATION ;
@@ -53,9 +51,8 @@ VAR ( uint16, OS_VAR_CLEARED) CriticalSection_Semaphore ;
 /* used to take a copy of ReadyTaskPCB_Index inside dispatcher */
 VAR ( uint8, OS_VAR_CLEARED ) DispatcherLocal_Variable ;
 
-
-
-
+/* used to indicate privilege of running task */
+VAR ( uint8, OS_VAR_CLEARED ) OsTask_PrivilegeFlag ;
 
 /**************************************************************************/
 
@@ -97,7 +94,11 @@ VAR ( uint8, OS_VAR_INIT ) ReadyTaskPCB_Index = INVALID_TASK ;
 VAR ( uint8, OS_VAR_INIT ) RunningTaskPCB_Index = INVALID_TASK ;
 
 /* used in context swithcing and preemption to easily modify value of stack frame */
-volatile CONSTP2VAR ( OsStackFrame, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr = OS_MSP_STACK_FRAME_ADDRESS ;
+volatile CONSTP2VAR ( OsStackFrame_MSP, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr = OS_MSP_STACK_FRAME_ADDRESS ;
+
+/* used in context swithcing and preemption to easily modify value of stack frame */
+volatile P2VAR ( OsStackFrame_PSP, OS_VAR_CLEARED, OS_APPL_CONST ) OsPSP_StackFrame_ptr  ;
+
 
 VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 
@@ -113,7 +114,10 @@ CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] = OS_ISRS_OBJECT_CONG
 /* used to hold resource id of last resource occupied by isr */
 VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;
 
+/**************************************************************************/
 
+/* used to carry HOOK_ID of current runnign Hook routine */
+VAR( HOOKType, OS_VAR_CLEARED ) HookID = INVALID_HOOK ;
 
 /**************************************************************************/
 
@@ -150,33 +154,26 @@ VAR( OsAlarmInternal, OS_CONFIG_DATA ) OsAlarmInternal_Array [ALARMS_NUMBER] ;
 /**************************************************************************/
 
 
-///* define configuration of schedule tables in system */
-//CONST( OsScheduleTable, OS_CONFIG_DATA ) ScheduleTable_Array [ TABLES_NUMBER ] = OS_TABLESS_OBJECT_CONGIFURATION ;
-//
-///* define configuration of expiry points in system */
-//CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] = OS_TABLESS_POINTS_OBJECT_CONGIFURATION ;
-//
-///* define configuration of tasks to be activated by tables in system */
-//CONST( OsTask, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] = OS_TABLESS_TASKS_OBJECT_CONGIFURATION ;
-//
-///* define configuration of tasks to be set its events by tables in system */
-//CONST( OsTask, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_TASKS_SET_OBJECT_CONGIFURATION ;
-//
-///* define configuration of events to be set by tables in system */
-//CONST( EventMaskRefType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION ;
 
+
+
+/* define configuration of schedule tables in system */
 CONST( OsScheduleTable, OS_CONFIG_DATA ) ScheduleTable_Array [ TABLES_NUMBER ] = OS_TABLESS_OBJECT_CONGIFURATION ;
 
 VAR( OsScheduleTableInternal, OS_DATA ) ScheduleTableInternal_Array [ TABLES_NUMBER ] ;
 
+/* define configuration of expiry points in system */
 CONST( OsScheduleTableExpiryPoint, OS_CONFIG_DATA ) ScheduleTablePoints_Array [ TABLES_POINTS_NUMBER ] = OS_TABLESS_POINTS_OBJECT_CONGIFURATION ;
 
 VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
 
+/* define configuration of tasks to be activated by tables in system */
 CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskActivation_Array [ TABLES_TASKS_NUMBER ] = OS_TABLESS_TASKS_OBJECT_CONGIFURATION ;
 
+/* define configuration of tasks to be set its events by tables in system */
 CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_TASKS_SET_OBJECT_CONGIFURATION ;
 
+/* define configuration of events to be set by tables in system */
 CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION ;
 
 /**************************************************************************/
