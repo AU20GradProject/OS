@@ -57,17 +57,17 @@
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
-            .OsScheduleTblExpPointOffset = 1000,\
+            .OsScheduleTblExpPointOffset = 1500,\
             .PointTasks = {1,1},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
-            .OsScheduleTblExpPointOffset = 500,\
+            .OsScheduleTblExpPointOffset = 1,\
             .PointTasks = {1,2},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\
         {\
-            .OsScheduleTblExpPointOffset = 1000,\
+            .OsScheduleTblExpPointOffset = 2,\
             .PointTasks = {1,3},\
             .OsScheduleTblAdjustableExpPoint = 0,\
         },\

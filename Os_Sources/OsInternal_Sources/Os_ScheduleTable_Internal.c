@@ -117,3 +117,8 @@ FUNC(void, OS_INTERNAL_CODE) CheckScheduleTablesExpiry( CounterType CounterID ) 
 }
 
 
+FUNC( StatusType, OS_INTERNAL_CODE ) CheckCfgs(ScheduleTableType ScheduleTableID){
+
+
+
+}
