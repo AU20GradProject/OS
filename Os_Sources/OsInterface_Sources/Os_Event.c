@@ -38,9 +38,11 @@ FUNC (StatusType, OS_CODE) SetEvent ( TaskType TaskID, EventMaskType Mask )
     if (TaskID < TASKS_NUMBER ) /* valid task id */
     {
 
-        if( OS_EVENT_BASIC_TASK != OsTasks_Array[ TaskID ].OsTaskEventRef ) /* task is extended task */
+        /* making sure that event is related to task */
+        Mask &= OsTasks_Array[ TaskID ].OsTaskEventRef ;
+
+        if( OS_EVENT_BASIC_TASK != Mask ) /* task is extended task */
         {
-            Mask &= OsTasks_Array[ TaskID ].OsTaskEventRef ;
 
             /* critical section to protect read modify write sequence, read from PCB_Index write to events flags  */
 
@@ -48,6 +50,7 @@ FUNC (StatusType, OS_CODE) SetEvent ( TaskType TaskID, EventMaskType Mask )
 
             if( INVALID_TASK != PCB_Index ) /* task is not suspended */
             {
+                /* set events for task even if task don't wait for them */
                 OsTasksPCB_Array[ PCB_Index ].Task_EvnetsFlag |= Mask ;
 
                 if ( OS_EVENT_BASIC_TASK != ( ( OsTasksPCB_Array[ PCB_Index ].Task_EvnetsWaiting ) & Mask ) ) /* set event task is waiting for */
@@ -55,7 +58,7 @@ FUNC (StatusType, OS_CODE) SetEvent ( TaskType TaskID, EventMaskType Mask )
                     OsTasksPCB_Array[ PCB_Index ].Task_EvnetsWaiting = OS_EVENT_BASIC_TASK ;
 
                     /* add new task's pcb index to proper priority queue */
-                    OsInternalScheduler ( PCB_Index, TRUE ) ;
+                    OsTailTask ( PCB_Index ) ;
 
                 }
                 else /* set event task isn't waiting for it */
@@ -72,7 +75,7 @@ FUNC (StatusType, OS_CODE) SetEvent ( TaskType TaskID, EventMaskType Mask )
         } /* if */
         else
         {
-            /* task is basic task or has no reference to this event */
+            /* task is basic task */
             ReturnResult = E_OS_ACCESS ;
 
         } /* else */
@@ -106,10 +109,17 @@ FUNC (StatusType, OS_CODE) ClearEvent ( EventMaskType Mask )
 
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
     {
-        if ( OS_EVENT_BASIC_TASK != OsTasks_Array [ ( OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ].OsTaskEventRef )
+
+
+        /* making sure that event is related to task */
+        Mask &= OsTasks_Array[ ( OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ].OsTaskEventRef ;
+
+        /* check if task is extended task */
+        if( OS_EVENT_BASIC_TASK != Mask ) /* task is extended task */
         {
             /* critical section to read modify write of Task_EvnetsFlag */
 
+            /* clear events according to input mask*/
             OsTasksPCB_Array[RunningTaskPCB_Index].Task_EvnetsFlag &= ~Mask ;
 
         }
@@ -153,6 +163,7 @@ FUNC (StatusType, OS_CODE) GetEvent ( TaskType TaskID, EventMaskRefType Event )
     if ( TaskID < TASKS_NUMBER ) /* valid task id */
     {
 
+        /* check if task is extended task */
         if( OS_EVENT_BASIC_TASK != OsTasks_Array[ TaskID ].OsTaskEventRef ) /* task is extended task */
         {
 
@@ -211,7 +222,9 @@ FUNC (StatusType, OS_CODE) WaitEvent ( EventMaskType Mask )
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
     {
 
+        /* making sure that event is related to task */
         Mask &= OsTasks_Array [ ( OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ].OsTaskEventRef ;
+
         if ( OS_EVENT_BASIC_TASK != Mask )
         {
             /* no need to critical section because RunningTaskPCB_Index won't be corrupted by other task */
@@ -223,10 +236,12 @@ FUNC (StatusType, OS_CODE) WaitEvent ( EventMaskType Mask )
                 if ( OS_EVENT_BASIC_TASK == ( Mask & OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_EvnetsFlag ) )
                 {
                     /* no waiting events are set write waiting mask, change task state, call scheduler, and release its internal resource  */
-                    OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = FALSE ;
                     OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_EvnetsWaiting =  Mask ;
                     OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_State = WAITING ;
-                    OsInternalScheduler ( RunningTaskPCB_Index, FALSE ) ;
+                    RemoveTask ( OsTasksPCB_Array[RunningTaskPCB_Index].Task_Priority ) ;
+                    /* to release internal resource if exist */
+                    OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority =  OsTasks_Array[ (OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority) ].OsTaskPriority ;
+
 
                 }
                 else

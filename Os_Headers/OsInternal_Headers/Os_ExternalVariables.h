@@ -38,28 +38,21 @@ extern CONST( OsAlarmAutostart, OS_CONFIG_DATA ) OsAutoStartAlarms_SettingArray 
 
 
 /* hold all ScheduleTables' IDs that will be activated in Auto start in all APP modes ordered by order of APP modes */
-extern CONST( ScheduleTableStatusType, OS_CONFIG_DATA ) OsAutoStartTabless_Array [ AUTOSTART_TABLESS_NUMBER ]  ;
+extern CONST( ScheduleTableStatusType, OS_CONFIG_DATA ) OsAutoStartTabless_Array [ AUTOSTART_TABLES_NUMBER ]  ;
 
 /* hold all tables' auto start settings  that will be activated in Auto start in all APP modes ordered by order of APP modes */
-extern CONST( OsScheduleTableAutostart, OS_CONFIG_DATA ) OsAutoStartTables_SettingArray [ AUTOSTART_TABLESS_NUMBER ]  ;
+extern CONST( OsScheduleTableAutostart, OS_CONFIG_DATA ) OsAutoStartTables_SettingArray [ AUTOSTART_TABLES_NUMBER ]  ;
 
 
 /* used to save app mode used inside system and passed to StartOS service */
 extern VAR( AppModeType, OS_CONFIG_DATA )  AppMode ;
 
-/* used to insure that nested critical section will be in right way */
-extern VAR ( uint16, OS_VAR_CLEARED) CriticalSection_Semaphore ;
+/**************************************************************************/
 
 /* used to take a copy of ReadyTaskPCB_Index inside dispatcher */
 extern VAR ( uint8, OS_VAR_CLEARED ) DispatcherLocal_Variable ;
 
-/* used to indicate privilege of running task */
-extern VAR ( uint8, OS_VAR_CLEARED ) OsTask_PrivilegeFlag ;
-
 /**************************************************************************/
-
-/* list of resources accessed by every task */
-extern CONST( ResourceType, OS_CONFIG_DATA ) OsTasksResources_Array [ TOTAL_TASKS_RESOURCES_NUMBER ] ;
 
 /* represent configuration data of every task */
 extern CONST( OsTask, OS_CONFIG_DATA ) OsTasks_Array [ TASKS_NUMBER ] ;
@@ -79,8 +72,6 @@ extern VAR( uint8, OS_VAR_CLEARED) OsTasksPriorityIndex_Array  [TASK_PRIORITIES_
  * OsTasksPriorityNext_Array  [0] = x, determine index of OsTasksPriority_Array [ 0 ][x] to carry the PCB index to new task of priority 0 */
 extern VAR( uint8, OS_VAR_CLEARED) OsTasksPriorityNext_Array  [TASK_PRIORITIES_NUMBER] ;
 
-extern VAR( uint8, OS_VAR_CLEARED ) OsTaskResourceAllocation [TASK_PRIORITIES_NUMBER] ;
-
 /* used to carry PCB index of all tasks
  * OsTasksPCB_Index_Array[ TaskId ] will return index of PCB of this task OsTasksPCB_Array in if not suspended  */
 extern VAR( uint8, OS_VAR_INIT) OsTasksPCB_Index_Array  [ TASKS_NUMBER ] ;
@@ -88,10 +79,6 @@ extern VAR( uint8, OS_VAR_INIT) OsTasksPCB_Index_Array  [ TASKS_NUMBER ] ;
 /* carry the highest priority of all current ready/running tasks
  * depending on it ReadyTaskPCB_Index will determined    */
 extern VAR ( uint8, OS_VAR_INIT ) ReadyHighestPriority ;
-
-/* used to handle internal and standard resources
- * depending on it new tasks arriving ready queue will be determine if preempt running task or not*/
-extern VAR ( uint8, OS_VAR_INIT ) PreemptionPriority ;
 
 
 /* carry PCB index of ready task that will preempt currently running task */
@@ -108,6 +95,13 @@ extern volatile P2VAR ( OsStackFrame_PSP, OS_VAR_CLEARED, OS_APPL_CONST ) OsPSP_
 
 extern VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 
+/* used to indicate current policy used in scheduling for running task preemptive or not */
+extern VAR ( uint8, OS_VAR_INIT ) SchedulingPolicy  ;
+
+/* used inside dispatcher to take a copy of task ceiling priority */
+extern VAR ( uint8, OS_VAR_CLEARED ) CeilingPriority  ;
+
+
 /**************************************************************************/
 
 
@@ -117,10 +111,8 @@ extern VAR( ISRType, OS_VAR_CLEARED ) IsrID ;
 
 
 /* represent configuration data of every task */
-extern CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] ;
+extern VAR( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] ;
 
-/* used to hold resource id of last resource occupied by isr */
-extern VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] ;
 
 /**************************************************************************/
 /* used to carry HOOK_ID of current runnign Hook routine */
@@ -129,18 +121,18 @@ extern VAR( HOOKType, OS_VAR_CLEARED ) HookID ;
 /**************************************************************************/
 
 /* used to define events configurations */
-extern CONST( EventMaskType, OS_CONFIG_DATA ) OsEvents_Array [ EVENTS_NUMBER ] ;
+extern CONST( EventMaskType, OS_CONFIG_DATA ) OsEvents_Array [ OS_EVENTS_NUMBER ] ;
 
 /**************************************************************************/
 
 /* define configurations of resources in system */
-extern CONST( OsResource, OS_CONFIG_DATA ) OsResource_Array [ RESOURCES_NUMBER ] ;
+extern CONST( OsResource, OS_CONFIG_DATA ) OsResource_Array [ OS_RESOURCES_NUMBER ] ;
 
 /* define array contain all resources PCBs with index of thier id */
-extern VAR( OsResource_PCB, OS_VAR_INIT) OsResourcePCB_Array [ RESOURCES_NUMBER ] ;
+extern VAR( OsResource_PCB, OS_VAR_INIT) OsResourcePCB_Array [ OS_RESOURCES_NUMBER ] ;
 
-/* define if the first task in priority queue allocate resource or not if 0 then no, if non 0 then hold the ceiling priority  */
-extern VAR( uint8, OS_VAR_CLEARED ) OsTaskResourceAllocation [TASK_PRIORITIES_NUMBER] ;
+extern VAR( boolean, OS_VAR_INIT) OsResource_CS_Flag  ;
+
 
 
 /**************************************************************************/
@@ -179,6 +171,22 @@ extern CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABL
 extern VAR( OsScheduleTableInternal, OS_DATA ) ScheduleTableInternal_Array [ TABLES_NUMBER ] ;
 
 extern VAR( ExpiryPointOffset, OS_DATA ) ScheduleTablePointsOffsets_Array[TABLES_POINTS_NUMBER ];
+
+/**************************************************************************/
+
+/* PEND status store variables used in Os_Isr */
+extern VAR(uint32, AUTOMATIC) PEND0;
+extern VAR(uint32, AUTOMATIC) PEND1;
+extern VAR(uint32, AUTOMATIC) PEND2;
+extern VAR(uint32, AUTOMATIC) PEND3;
+extern VAR(uint32, AUTOMATIC) PEND4;
+
+
+/* Variable contains the called interrupt disable function, if no function is called default value is NoDisableActive*/
+extern VAR(ActiveIsrDisableType, AUTOMATIC) ActiveIsrDisable;
+
+extern VAR(uint8, AUTOMATIC) suspendCount;
+
 
 /**************************************************************************/
 

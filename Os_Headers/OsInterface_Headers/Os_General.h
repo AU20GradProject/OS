@@ -50,6 +50,9 @@ FUNC (void, OS_CODE) StartOS ( AppModeType Mode ) ;
 
 /*********************************************************************************************************/
 
+/* user can call this system service to abort the overall system (e.g. emergency off).
+ * The operating system also calls this function internally,
+ *  if it has reached an undefined internal state and is no longer ready to run.    */
 FUNC (void, OS_CODE) ShutdownOS ( StatusType Error ) ;
 
 /*********************************************************************************************************/

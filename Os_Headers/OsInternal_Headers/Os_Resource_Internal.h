@@ -13,6 +13,11 @@
 
 /*******************************************************************/
 
+typedef VAR( uint64, TYPEDEF ) ResourceMaskType ;
+
+
+/*******************************************************************/
+
 
 typedef struct
 {
@@ -23,7 +28,8 @@ typedef struct
     VAR( uint8, AUTOMATIC ) OsResourcePriority ;
 
     /* link to the resource. Must be valid if OsResourceProperty is LINKED.
-     * If OsResourceProperty is not LINKED the value is ignored */
+     * If OsResourceProperty is not LINKED the value is ignored
+     * this hold resource id linked to this resource */
     VAR( ResourceType, AUTOMATIC ) OsResourceLinkedResourceRef ;
 
 
@@ -33,18 +39,19 @@ typedef struct
 
 typedef struct
 {
-    /* hold previous PreemptionPriority before task get this resource */
-    VAR( uint8, AUTOMATIC ) OsPreviousPreemptionPriority ;
 
     /*This specifies the id of task own this resource */
     VAR( TaskType, AUTOMATIC ) OsResourceOwner ;
 
-    /*This specifies  the id of resource occupied by OsResourceOwner before this resourc*/
+    /*This specifies  the id of resource occupied by OsResourceOwner before this resource*/
     VAR( ResourceType, AUTOMATIC ) OsPreviousResource ;
 
 
 } OsResource_PCB ;
 
+/*******************************************************************/
+
+void Resource_IsrMask ( uint8 ResourcePriority ) ;
 
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_RESOURCE_INTERNAL_H_ */

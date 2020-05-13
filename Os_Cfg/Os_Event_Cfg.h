@@ -12,7 +12,7 @@
 #define OS_CFG_OS_EVENT_CFG_H_
 
 
-#define EVENTS_NUMBER   4
+#define OS_EVENTS_NUMBER   4u
 
 #define OS_EVENT_BASIC_TASK 0x00000000u
 

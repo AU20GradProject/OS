@@ -39,16 +39,16 @@ FUNC (StatusType, OS_CODE) GetResource ( ResourceType ResID )
 
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
     VAR( uint8, AUTOMATIC ) CeilingPriority  ;
-
+    VAR( ResourceMaskType, AUTOMATIC ) ResourceMask ;
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
     {
         /* called from task */
-        CeilingPriority = OsTasks_Array [ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID ) ].OsTaskCeillingPriority ;
+        ResourceMask = ( OsTasks_Array [(OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID)].OsTaskCeilingPriority_Internal ) & (1 << ResID) ;
 
-
-        if ( ResID < RESOURCES_NUMBER ) /* check for valid resource */
+        if ( ResID < OS_RESOURCES_NUMBER ) /* check for valid resource */
         {
-            if ( OsResource_Array[ ResID ].OsResourcePriority <= CeilingPriority )
+            /* check if task try to get resource which could occupy */
+            if ( OS_NO_RESOURCE_MASK != ResourceMask )
             {
                 /* resource is free and running task has right to get it
                  * if running task has another resource other than ResID but has same  or higher priority then the behavior won't change
@@ -56,92 +56,35 @@ FUNC (StatusType, OS_CODE) GetResource ( ResourceType ResID )
 
                 /* first thing to do is allocate resource */
 
-
-                /* save old preemption priority */
-                OsResourcePCB_Array[ ResID ].OsPreviousPreemptionPriority =  PreemptionPriority ;
-
-                /* check if task has a higher internal ceiling priority or previous resource in case of nesting has higher priority  */
-                if ( ( OsResource_Array[ ResID ].OsResourcePriority ) > PreemptionPriority )
-                {
-                    PreemptionPriority = OsResource_Array[ ResID ].OsResourcePriority ;
-
-                    /* case there's interrupt allocate resource must mask all lower priority interrupt than ceiling priority */
-                    switch ( PreemptionPriority )
-                    {
-                        case 0x08u :
-                        {
-
-                            __asm ( " MOV R10, #0x0E0u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x09u :
-                        {
-                            __asm ( " MOV R10, #0x0C0u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-
-                        case 0x0Au :
-                        {
-                            __asm ( " MOV R10, #0x0A0u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x0Bu :
-                        {
-                            __asm ( " MOV R10, #0x080u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x0Cu :
-                        {
-                            __asm ( " MOV R10, #0x060u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x0Du :
-                        {
-                            __asm ( " MOV R10, #0x040u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x0Eu :
-                        {
-                            __asm ( " MOV R10, #0x020u " ) ;
-                            __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            break ;
-                        }
-                        case 0x0Fu :
-                        {
-
-
-                            break ;
-
-                        } /* case */
-
-                    } /* switch */
-
-                } /* if */
-                else
-                {
-
-                }
-
-                OsTaskResourceAllocation[ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority ) ] = PreemptionPriority ;
-
-
                 /* modify resource setting */
-                OsResourcePCB_Array[ ResID ].OsResourceOwner = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority ;
+                OsResourcePCB_Array[ ResID ].OsResourceOwner = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID ;
                 OsResourcePCB_Array[ ResID ].OsPreviousResource = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied  ;
                 OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied = ResID ;
+
+                if ( (OsResource_Array[ResID].OsResourcePriority) > (OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority) )
+                {
+                    CeilingPriority = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority  ;
+                    OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority = OsResource_Array[ResID].OsResourcePriority ;
+
+                    if ( (OsResource_Array[ResID].OsResourcePriority) >= TASK_PRIORITIES_NUMBER )
+                    {
+                        Resource_IsrMask( OsResource_Array[ResID].OsResourcePriority ) ;
+
+                    }
+                    else
+                    {
+                        /* remove task from old priority queue */
+                        OsTasksPriority_Array [CeilingPriority] [ (OsTasksPriorityIndex_Array[CeilingPriority]) ] = INVALID_TASK ;
+                        OsTasksPriorityIndex_Array[CeilingPriority] = ( OsTasksPriorityIndex_Array[CeilingPriority] + 1 ) % TASKS_PER_PRIORITY ;
+
+                        /* put task in new queue */
+                        OsHeadTask( RunningTaskPCB_Index );
+                    }
+
+                }
+                else
+                {
+                }
 
             }
             else
@@ -164,22 +107,33 @@ FUNC (StatusType, OS_CODE) GetResource ( ResourceType ResID )
     } /* if */
     else
     {
-
         /* called form isr */
-        /* discard for now */
-        if ( ResID < RESOURCES_NUMBER ) /* check for valid resource */
+
+        if ( ResID < OS_RESOURCES_NUMBER ) /* check for valid resource */
         {
+            ResourceMask = ( OsIsr_Array [IsrID].OsResourceRef ) & (1 << ResID) ;
 
-            /* called from isr */
-            CeilingPriority = OsIsr_Array [ IsrID ].OsIsrCeillingPriority ;
 
-            if ( OsResource_Array[ ResID ].OsResourcePriority <= CeilingPriority )
+            if ( OS_NO_RESOURCE_MASK != ResourceMask )
             {
+
+                /* modify resource setting */
+                OsResourcePCB_Array[ ResID ].OsResourceOwner = IsrID ;
+                OsResourcePCB_Array[ ResID ].OsPreviousResource = OsIsr_Array [IsrID].Isr_LastResourceOccupied  ;
+                OsIsr_Array [IsrID].Isr_LastResourceOccupied = ResID ;
+
+
+                if ( (OsResource_Array[ResID].OsResourcePriority) > (OsIsr_Array [ IsrID ].Isr_Priority) )
+                {
+                    Resource_IsrMask( OsResource_Array[ResID].OsResourcePriority );
+                }
+                else
+                {
+                }
 
             }
             else
             {
-
             }
 
         } /* if */
@@ -193,8 +147,16 @@ FUNC (StatusType, OS_CODE) GetResource ( ResourceType ResID )
 
     } /* else */
 
-    CS_OFF ;
 
+    if ( TRUE == OsResource_CS_Flag )
+    {
+        OsResource_CS_Flag = FALSE ;
+    }
+    else
+    {
+        CS_OFF ;
+
+    }
     return ReturnResult ;
 }
 
@@ -215,42 +177,32 @@ FUNC (StatusType, OS_CODE) ReleaseResource ( ResourceType ResID )
 
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
     VAR( uint8, AUTOMATIC ) CeilingPriority  ;
+    VAR( ResourceType, AUTOMATIC ) ResID_Temp  ;
+    VAR( ResourceMaskType, AUTOMATIC ) ResourceMask = ( OsTasks_Array [(OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID)].OsTaskCeilingPriority_Internal ) & (1 << ResID) ;
+
+
 
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
     {
         /* called from task */
-        CeilingPriority = OsTasks_Array [ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID ) ].OsTaskCeillingPriority ;
+        CeilingPriority = OsTasks_Array [ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID ) ].OsTaskCeilingPriority_Internal ;
 
-        if ( ResID < RESOURCES_NUMBER ) /* check for valid resource */
+        if ( ResID < OS_RESOURCES_NUMBER ) /* check for valid resource */
         {
-            if ( OsResource_Array[ ResID ].OsResourcePriority <= CeilingPriority )
+            if ( OS_NO_RESOURCE_MASK != ResourceMask )
             {
                 /* check for releasing sequence of nested resources */
                 if ( ResID == OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied)
                 {
                     /* free ResID from task's resources list */
+
                     OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied = OsResourcePCB_Array[ ResID ].OsPreviousResource ;
-                    OsResourcePCB_Array[ ResID ].OsPreviousResource = NO_RESOURCE ;
+                    OsResourcePCB_Array[ ResID ].OsPreviousResource = OS_NO_RESOURCE ;
                     OsResourcePCB_Array[ ResID ].OsResourceOwner = INVALID_TASK ;
 
 
-                    /* critical section to modify preemption priority */
-
-
-
-                    /* check if preemption priority of task was masking all interrupts */
-                    if ( PreemptionPriority == 0x0F )
-                    {
-                        /* related to CS_ON in GetResource : case 0x0F */
-                    }
-                    else
-                    {
-                    }
-
-                    PreemptionPriority = OsResourcePCB_Array[ ResID ].OsPreviousPreemptionPriority ;
-
                     /* check if running task still occupy resources */
-                    if( NO_RESOURCE == ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied ) )
+                    if( OS_NO_RESOURCE == ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied ) )
                     {
 
                     }
@@ -258,92 +210,34 @@ FUNC (StatusType, OS_CODE) ReleaseResource ( ResourceType ResID )
                     {
                         /* running task still occupy resource */
 
-                        /* case there's interrupt allocate resource must mask all lower priority interrupt than ceiling priority */
-                        switch ( PreemptionPriority )
+                        if( (OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority) > (OsResource_Array[ ResID ].OsResourcePriority) )
                         {
 
-                            case 0x08u :
+                        }
+                        else
+                        {
+
+                            /* check for task ceiling priority */
+                            CeilingPriority = OsTasks_Array [ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_ID ) ].OsTaskCeilingPriority_Internal ;
+                            ResID_Temp = OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied ;
+
+                            if( (OsResource_Array[ResID_Temp].OsResourcePriority) > CeilingPriority )
                             {
-
-                                __asm ( " MOV R10, #0x0E0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
+                                OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority = OsResource_Array[ResID_Temp].OsResourcePriority ;
                             }
-                            case 0x09u :
+                            else
                             {
-                                __asm ( " MOV R10, #0x0C0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
+                                OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority = CeilingPriority ;
                             }
 
-                            case 0x0Au :
-                            {
-                                __asm ( " MOV R10, #0x0A0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
+                            OsHeadTask( RunningTaskPCB_Index ) ;
+                            RemoveTask( OsResource_Array[ResID].OsResourcePriority ) ;
 
-                                break ;
-                            }
-                            case 0x0Bu :
-                            {
-                                __asm ( " MOV R10, #0x080u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Cu :
-                            {
-                                __asm ( " MOV R10, #0x060u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Du :
-                            {
-                                __asm ( " MOV R10, #0x040u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Eu :
-                            {
-                                __asm ( " MOV R10, #0x020u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Fu :
-                            {
-
-                                break ;
-
-                            }
-                            default :
-                            {
-                                __asm ( " MOV R10, #0x01Fu " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            } /* case */
-
-                        } /* switch */
+                        }
 
                     } /* else */
 
-                    OsTaskResourceAllocation[ ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority ) ] = PreemptionPriority ;
-                    ReadyTaskPCB_Index = OsTasksPriority_Array [ReadyHighestPriority] [ (OsTasksPriorityIndex_Array[ReadyHighestPriority]) ] ;
-
-                    /* check for tasks could preempt running task after release resource */
-                    if ( ReadyHighestPriority > PreemptionPriority )
-                    {
-                        DISPATCHER_CALL ;
-                    }
-                    else
-                    {
-
-                    }
-
-
+                    Resource_IsrMask( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_Priority );
 
                 }
                 else
@@ -375,128 +269,56 @@ FUNC (StatusType, OS_CODE) ReleaseResource ( ResourceType ResID )
     else
     {
         /* called from isr */
-        /* discard for now */
 
-        CeilingPriority = OsIsr_Array [ IsrID ].OsIsrCeillingPriority ;
+        CeilingPriority = OsIsr_Array [ IsrID ].OsResourceRef ;
 
-        if ( ResID < RESOURCES_NUMBER ) /* check for valid resource */
+        if ( ResID < OS_RESOURCES_NUMBER ) /* check for valid resource */
         {
-            if ( OsResource_Array[ ResID ].OsResourcePriority <= CeilingPriority )
+            if ( OS_NO_RESOURCE_MASK != ResourceMask )
             {
 
                 /* check for releasing sequence of nested resources */
-                if ( ResID == OsIsr_LastResource [ IsrID ] )
+                if ( ResID == OsIsr_Array [ IsrID ].Isr_LastResourceOccupied)
                 {
-
                     /* free ResID from task's resources list */
-                    OsIsr_LastResource [ IsrID ] = OsResourcePCB_Array[ ResID ].OsPreviousResource ;
-                    OsResourcePCB_Array[ ResID ].OsPreviousResource = NO_RESOURCE ;
+                    OsIsr_Array [ IsrID ].Isr_LastResourceOccupied = OsResourcePCB_Array[ ResID ].OsPreviousResource ;
+                    OsResourcePCB_Array[ ResID ].OsPreviousResource = OS_NO_RESOURCE ;
                     OsResourcePCB_Array[ ResID ].OsResourceOwner = INVALID_TASK ;
 
                     /* check if running task still occupy resources */
-                    if( NO_RESOURCE == ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied ) )
+                    if( OS_NO_RESOURCE == ( OsTasksPCB_Array [ RunningTaskPCB_Index ].Task_LastResourceOccupied ) )
                     {
 
                     }
                     else
                     {
-                        /* running isr still occupy resource */
+                        /* running task still occupy resource */
 
-
-                        /* check if preemption priority of isr was masking all interrupts */
-                        if ( OsResource_Array[ ResID ].OsResourcePriority == 0x0F )
+                        if( (OsIsr_Array [ IsrID ].Isr_Priority) > (OsResource_Array[ ResID ].OsResourcePriority) )
                         {
-                            /* related to CS_ON in GetResource : case 0x0F */
+
                         }
                         else
                         {
 
+                            ResID_Temp = OsIsr_Array [ IsrID ].Isr_LastResourceOccupied ;
+                            Resource_IsrMask( OsResource_Array[ResID_Temp].OsResourcePriority );
+
                         }
 
-                        /* case there's interrupt allocate resource must mask all lower priority interrupt than ceiling priority */
-                        switch ( OsResourcePCB_Array[ ResID ].OsPreviousPreemptionPriority )
-                        {
-
-                            case 0x08u :
-                            {
-
-                                __asm ( " MOV R10, #0x0E0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x09u :
-                            {
-                                __asm ( " MOV R10, #0x0C0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-
-                            case 0x0Au :
-                            {
-                                __asm ( " MOV R10, #0x0A0u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Bu :
-                            {
-                                __asm ( " MOV R10, #0x080u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Cu :
-                            {
-                                __asm ( " MOV R10, #0x060u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Du :
-                            {
-                                __asm ( " MOV R10, #0x040u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Eu :
-                            {
-                                __asm ( " MOV R10, #0x020u " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                                break ;
-                            }
-                            case 0x0Fu :
-                            {
-
-                                CS_ON ;
-
-                                break ;
-
-                            }
-                            default :
-                            {
-                                __asm ( " MOV R10, #0x01Fu " ) ;
-                                __asm ( " MSR BASEPRI_MAX, R10 " ) ;
-
-                            } /* case */
-
-                        } /* switch */
-
                     } /* else */
+
                 }
                 else
                 {
                     /* another resource must released first or task don't occupy this resource */
                     ReturnResult = E_OS_NOFUNC ;
-                }
+
+                } /* else */
 
             }
             else
             {
-
                 /* ceiling priority of task is higher or lower than ceiling priority of resource,
                  * if resource occupied  by another task if this task access same resource it won't get in running state
                  * if not then its priority is higher than ceiling priority
@@ -506,14 +328,20 @@ FUNC (StatusType, OS_CODE) ReleaseResource ( ResourceType ResID )
         }
         else
         {
-
             /* invalid resource id */
             ReturnResult = E_OS_ID ;
         }
-
     }
 
-    CS_OFF ;
+    if ( TRUE == OsResource_CS_Flag )
+    {
+        OsResource_CS_Flag = FALSE ;
+    }
+    else
+    {
+        CS_OFF ;
+
+    }
 
     return ReturnResult ;
 

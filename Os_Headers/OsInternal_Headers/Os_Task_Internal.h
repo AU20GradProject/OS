@@ -78,10 +78,10 @@ typedef struct
     VAR( uint8, AUTOMATIC ) OsTaskPriority ;
 
     /*  internal resource ceiling priority if no resources accessed by the task value will be = OsTaskPriority */
-    VAR( uint8, AUTOMATIC ) OsTaskCeillingPriority_Internal ;
+    VAR( uint8, AUTOMATIC ) OsTaskCeilingPriority_Internal ;
 
-    /*  ceiling priority if no resources accessed by the task value will be = OsTaskPriority */
-    VAR( uint8, AUTOMATIC ) OsTaskCeillingPriority ;
+    /* defines the list of resource that task may occupy */
+    VAR( ResourceMaskType, AUTOMATIC ) OsResourceRef ;
 
     /* defines the list of events the extended task may react on, as a mask for events of this task  */
     VAR( EventMaskType, AUTOMATIC ) OsTaskEventRef ;
@@ -97,7 +97,6 @@ typedef struct
 typedef struct
 {
 
-    VAR( boolean, AUTOMATIC ) Task_PrivilegeFlag ;
 
     /* variable to carry number of multiple activation requested for basic tasks
      * at every activate will be decremented if not equeal to zero
@@ -148,9 +147,6 @@ typedef struct
 
     /* control register for task to save privilege level */
     VAR( uint32, AUTOMATIC ) Task_CONTROL ;
-
-    /* basepri register for task */
-    VAR( uint32, AUTOMATIC ) Task_BASEPRI ;
 
     /* flags determine states of the task set or cleared */
     VAR( EventMaskType, AUTOMATIC ) Task_EvnetsFlag ;
@@ -213,11 +209,25 @@ typedef struct
 
 
 /* make context switching */
-void OsDispatcher (void) ;
+FUNC (void, OS_CODE) OsDispatcher (void) ;
 
-/* add/remove PCB which have index PCB_Index to/from proper priority queue and call disaptacher if preemption needed
- * add or rempoving depend on AddToQueue parameter if TRUE then add if false then remove */
-void OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue ) ;
+/* used to add Task to last of proper priority queue and modify the queue */
+FUNC (void, OS_CODE) OsTailTask (  uint8 PCB_Index ) ;
 
+/* used to add to head of proper priority queue and modify the queue */
+FUNC (void, OS_CODE) OsHeadTask ( uint8 PCB_Index ) ;
+
+/* used to remove task from in the head of priority queue and modify the queue */
+FUNC (void, OS_CODE) RemoveTask ( uint8 TaskPriority ) ;
+
+FUNC (void, OS_CODE) Init_PCB ( uint8 PCB_Index, uint8 TaskID ) ;
+
+
+/*****************************************************************************/
 
 #endif /* OS_HEADERS_OSINTERNAL_HEADERS_OS_TASK_INTERNAL_H_ */
+
+
+
+
+

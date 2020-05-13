@@ -79,9 +79,16 @@
         ,\
         .OsTaskPriority = 0 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x04u \
+        .OsTaskCeilingPriority_Internal = 0x04u \
         ,\
-        .OsTaskCeillingPriority = 0x08u \
+        .OsResourceRef = \
+        (\
+                OS_RESORCE_0_MASK | \
+                OS_RESORCE_1_MASK | \
+                OS_RESORCE_2_MASK | \
+                OS_RESORCE_3_MASK | \
+                OS_RESORCE_4_MASK \
+        )\
         ,\
         .OsTaskEventRef = \
         (\
@@ -96,9 +103,9 @@
         ,\
         .OsTaskPriority = 1 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x01u \
+        .OsTaskCeilingPriority_Internal = 0x01u \
         ,\
-        .OsTaskCeillingPriority = 1 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -110,9 +117,9 @@
         ,\
         .OsTaskPriority = 2 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x02u \
+        .OsTaskCeilingPriority_Internal = 0x02u \
         ,\
-        .OsTaskCeillingPriority = 2 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -124,9 +131,9 @@
         ,\
         .OsTaskPriority = 3 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x03u \
+        .OsTaskCeilingPriority_Internal = 0x03u \
         ,\
-        .OsTaskCeillingPriority = 3 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -138,9 +145,9 @@
         ,\
         .OsTaskPriority = 4 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x04u \
+        .OsTaskCeilingPriority_Internal = 0x04u \
         ,\
-        .OsTaskCeillingPriority = 4 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -152,9 +159,9 @@
         ,\
         .OsTaskPriority = 5 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x05u \
+        .OsTaskCeilingPriority_Internal = 0x05u \
         ,\
-        .OsTaskCeillingPriority = 5 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -166,9 +173,9 @@
         ,\
         .OsTaskPriority = 6 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x06u \
+        .OsTaskCeilingPriority_Internal = 0x06u \
         ,\
-        .OsTaskCeillingPriority = 6 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -180,9 +187,9 @@
         ,\
         .OsTaskPriority = 7 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x07u \
+        .OsTaskCeilingPriority_Internal = 0x07u \
         ,\
-        .OsTaskCeillingPriority = 7 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = \
         (\
@@ -200,9 +207,9 @@
         ,\
         .OsTaskPriority = 7 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x07u \
+        .OsTaskCeilingPriority_Internal = 0x07u \
         ,\
-        .OsTaskCeillingPriority = 7 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -214,9 +221,9 @@
         ,\
         .OsTaskPriority = 6 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x06u \
+        .OsTaskCeilingPriority_Internal = 0x06u \
         ,\
-        .OsTaskCeillingPriority = 6 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -228,9 +235,9 @@
         ,\
         .OsTaskPriority = 5 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x05u \
+        .OsTaskCeilingPriority_Internal = 0x05u \
         ,\
-        .OsTaskCeillingPriority = 5 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -242,9 +249,9 @@
         ,\
         .OsTaskPriority = 4 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x04u \
+        .OsTaskCeilingPriority_Internal = 0x04u \
         ,\
-        .OsTaskCeillingPriority = 4 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -256,9 +263,9 @@
         ,\
         .OsTaskPriority = 3 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x03u \
+        .OsTaskCeilingPriority_Internal = 0x03u \
         ,\
-        .OsTaskCeillingPriority = 3 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\
@@ -270,9 +277,9 @@
         ,\
         .OsTaskPriority = 2 \
         ,\
-        .OsTaskCeillingPriority_Internal = 0x02u \
+        .OsTaskCeilingPriority_Internal = 0x02u \
         ,\
-        .OsTaskCeillingPriority = 2 \
+        .OsResourceRef = OS_NO_RESOURCE_MASK \
         ,\
         .OsTaskEventRef = OS_EVENT_BASIC_TASK \
     }\

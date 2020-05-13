@@ -24,7 +24,6 @@ FUNC (void, OS_CODE) OsDispatcher (void)
     if ( INVALID_TASK != RunningTaskPCB_Index )/* case there's preemption to running task */
     {
 
-
         /* push value of preempted task's special registers which not pushed automatically into main stack while preemption */
         __asm ( " MRS R12, PSP " ) ;
         __asm ( " PUSH {R12} " ) ;
@@ -39,9 +38,8 @@ FUNC (void, OS_CODE) OsDispatcher (void)
         __asm ( " MRS R12, CONTROL " ) ;
         __asm ( " PUSH {R12} " ) ;
 
-
+        /* initialize the pointer of PSP frame casting  */
         OsPSP_StackFrame_ptr = (( ( volatile P2VAR( OsStackFrame_PSP, AUTOMATIC, REGSPACE ) ) (OsMSP_StackFrame_ptr->PSP) ) ) ;
-
 
         /* save context of preempted task */
 
@@ -59,7 +57,7 @@ FUNC (void, OS_CODE) OsDispatcher (void)
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R0 = OsPSP_StackFrame_ptr->R0 ;
 
         /* this registers are pushed manually */
-        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_SP = OsMSP_StackFrame_ptr->PSP + 0x020u  ;
+        OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_SP = OsMSP_StackFrame_ptr->PSP + 0x020u  ;    /* the added value for the automatically pushed registers */
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R4 = OsMSP_StackFrame_ptr->R4 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R5 = OsMSP_StackFrame_ptr->R5 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R6 = OsMSP_StackFrame_ptr->R6 ;
@@ -70,17 +68,14 @@ FUNC (void, OS_CODE) OsDispatcher (void)
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_R11 = OsMSP_StackFrame_ptr->R11 ;
         OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_CONTROL = OsMSP_StackFrame_ptr->CONTROL ;
 
-
-        OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = PreemptionPriority ;
-
     }
     else    /* case running task is terminated */
     {
-
     }
 
     if ( INVALID_TASK != ReadyHighestPriority ) /* case there's tasks could enter running state */
     {
+        /* initialize stack pointer to allocate space for 12 word to wirte in registers that will be pooped manually */
         __asm ( " MOV R12, #0x7FD0 " ) ;
         __asm( " MOVT R12, #0x2000 " ) ;
         __asm ( " MSR MSP, R12 " ) ;
@@ -88,9 +83,36 @@ FUNC (void, OS_CODE) OsDispatcher (void)
         /* take copy for ReadyTaskPCB_Index, CS for read modify write sequence from ReadyTaskPCB_Index to ReadyHighestPriority*/
         __asm ( " CPSID i " ) ;
 
+        /* critical section to modify priority queue */
+        CeilingPriority = OsTasks_Array[ ( OsTasksPCB_Array[ ReadyTaskPCB_Index ].Task_ID ) ].OsTaskCeilingPriority_Internal ;
+        DispatcherLocal_Variable = OsTasksPCB_Array[ ReadyTaskPCB_Index ].Task_Priority ;
+
+        /* assign new priority for task if has an internal resource */
+        if ( CeilingPriority >  OsTasksPCB_Array[ ReadyTaskPCB_Index ].Task_Priority )
+        {
+
+            /* remove task from old queue */
+            OsTasksPriority_Array [DispatcherLocal_Variable] [ (OsTasksPriorityIndex_Array[DispatcherLocal_Variable]) ] = INVALID_TASK ;
+            OsTasksPriorityIndex_Array[DispatcherLocal_Variable] = ( OsTasksPriorityIndex_Array[DispatcherLocal_Variable] + 1 ) % TASKS_PER_PRIORITY ;
+
+            /* modify task priority */
+            OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_Priority =  CeilingPriority ;
+            ReadyHighestPriority = CeilingPriority ;
+
+            /* add task to the new queue */
+            OsTasksPriority_Array[ CeilingPriority ][ OsTasksPriorityNext_Array[CeilingPriority] ] = ReadyTaskPCB_Index ;
+            OsTasksPriorityNext_Array[CeilingPriority] = ( OsTasksPriorityNext_Array[CeilingPriority] + 1 ) % TASKS_PER_PRIORITY ;
+
+        }
+        else
+        {
+        }
+
         DispatcherLocal_Variable = ReadyTaskPCB_Index ;
-        PreemptionPriority = OsTasks_Array[ ( OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_ID ) ].OsTaskCeillingPriority_Internal ;
+
         __asm ( " CPSIE i " ) ;
+
+        SchedulingPolicy =  OsTasks_Array[ (OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_ID) ].OsTaskSchedule ;
 
         /* write values of next running task into stack to be popped into registers */
 
@@ -108,10 +130,7 @@ FUNC (void, OS_CODE) OsDispatcher (void)
 
         OsPSP_StackFrame_ptr = (( ( volatile P2VAR( OsStackFrame_PSP, AUTOMATIC, REGSPACE ) ) (OsMSP_StackFrame_ptr->PSP) ) ) ;
 
-
         /* manual pop for special register ready task */
-
-
         __asm ( " POP {R12} " ) ;
         __asm ( " MSR CONTROL, R12 " ) ;
 
@@ -126,7 +145,6 @@ FUNC (void, OS_CODE) OsDispatcher (void)
 
         __asm ( " POP {R12} " ) ;
         __asm ( " MSR PSP, R12 " ) ;
-
 
         /* will be popped automatically in exception return */
         OsPSP_StackFrame_ptr->R0 = OsTasksPCB_Array[ DispatcherLocal_Variable ].Task_R0 ;
@@ -152,161 +170,150 @@ FUNC (void, OS_CODE) OsDispatcher (void)
 }
 
 
+
 /*****************************************************************************/
 
-/* add/remove PCB which have index PCB_Index to/from proper priority queue and call disaptacher if preemption needed
- * add or removing depend on AddToQueue parameter if TRUE then add if false then remove */
-FUNC (void, OS_CODE) OsInternalScheduler ( uint8 PCB_Index, boolean AddToQueue )
+/* used to add Task to last of proper priority queue and modify the queue */
+FUNC (void, OS_CODE) OsTailTask ( uint8 PCB_Index )
 {
-
-    VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[ PCB_Index ].Task_Priority ;
-    VAR( uint8, AUTOMATIC ) TempVariable = 0 ;
+    VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[PCB_Index].Task_Priority ;
 
 
-    if( TRUE == AddToQueue )    /* add pcb to ready queue */
+    OsTasksPriority_Array[ TaskPriority ][ OsTasksPriorityNext_Array[TaskPriority] ] = PCB_Index ;
+    OsTasksPriorityNext_Array[TaskPriority] = ( OsTasksPriorityNext_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
+
+    /* check for preemption and calling dispatcher */
+
+    /* critical section to read modify write to ReadyHighestPriority & DISPATCHER_CALL & ReadyTaskPCB_Index */
+
+    if( TaskPriority > ReadyHighestPriority )  /* if task priority is the highest in current system */
     {
-        /* critical section to read modify write to OsTasksPriorityNext_Array */
+        /* modify highest priority in system and pcb index of task which will preempt running task */
+        ReadyHighestPriority = TaskPriority ;
+        ReadyTaskPCB_Index = PCB_Index ;
 
-        /* take a copy */
-        TempVariable = OsTasksPriorityNext_Array[TaskPriority] ;
-
-        /* allocation for resource ( empty place in ready queue ) */
-        OsTasksPriorityNext_Array[TaskPriority] = ( OsTasksPriorityNext_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
-
-
-        /* put Task PCB in ready queue*/
-        OsTasksPriority_Array[ TaskPriority][ TempVariable ] = PCB_Index ;
-
-        /* check case no running tasks in system */
-        if ( INVALID_TASK != RunningTaskPCB_Index )
+        if( TASK_FULL == SchedulingPolicy )     /* task is follow fully preemptive scheduling policy */
         {
-            TempVariable = OsTasks_Array[ (OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ID) ].OsTaskSchedule ;
-        }
-        else
-        {
-
-        }
-        /* check for preemption and calling dispatcher */
-
-        /* critical section to read modify write to ReadyHighestPriority & DISPATCHER_CALL & ReadyTaskPCB_Index */
-
-        if( TaskPriority > ReadyHighestPriority )  /* if task priority is the highest in current system */
-        {
-            /* modify highest priority in system and pcb index of task which will preempt running task */
-            ReadyHighestPriority = TaskPriority ;
-
-            ReadyTaskPCB_Index = PCB_Index ;
-
-            if( ( TASK_FULL == TempVariable ) && ( TaskPriority > PreemptionPriority ) )     /* task is follow fully preemptive scheduling policy */
-            {
-                DISPATCHER_CALL ;
-            }
-            else    /* task is follow non preemptive scheduling policy */
-            {
-            }
-
-        } /* if */
-        else if ( INVALID_TASK == ReadyHighestPriority )   /* if no ready tasks in system */
-        {
-            /* modify highest priority in system and pcb index of task which will preempt running task */
-            ReadyHighestPriority = TaskPriority ;
-            ReadyTaskPCB_Index = PCB_Index ;
-
             DISPATCHER_CALL ;
         }
-        else
+        else    /* task is follow non preemptive scheduling policy */
         {
         }
-
 
     } /* if */
-    else    /* remover pcb from ready queue */
+    else if ( INVALID_TASK == ReadyHighestPriority )   /* if no ready tasks in system */
     {
-        TaskPriority = OsTasksPCB_Array[ PCB_Index ].Task_Priority ;
-
-        /* here no need for critical section because just running task can reach for this point of code
-           and if preempted that will be with higher priority task which won't access same element  */
-
-
-        if ( ReadyHighestPriority > TaskPriority )  /* no need for CS, just read ReadyHighestPriority */ /* this case just happen in non preemptive tasks */
-        {
-
-        }
-        else    /* in preemptive task ReadyHighestPriority will be equal to RunningTaskPCB_Index while task is running */
-        {
-
-            /* critical section to read modify write to OsTasksPriority_Array & ReadyHighestPriority & ReadyTaskPCB_Index */
-
-            /* remove PCB index from ready queue and shift first element in queue
-             * done in critical section just before calling dispatcher, because if preempted
-             * how will it return after pcb index in ready priority queue is removed */
-            OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] = INVALID_TASK ;
-            OsTasksPriorityIndex_Array[TaskPriority] = ( OsTasksPriorityIndex_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
-
-
-            /* check for highest priority and if no there ready tasks then TaskPriority = INVALID_TASK */
-            while ( ( INVALID_TASK == OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] ) && ( INVALID_TASK != TaskPriority ) )
-            {
-                /* get highest priority in system */
-                TaskPriority-- ;
-            } /* while */
-
-            ReadyHighestPriority = TaskPriority ;
-
-            if ( INVALID_TASK != TaskPriority ) /* another task could enter running state */
-            {
-
-                /* check for task allocate resources and preempted by higher priority task wasn't allocate related resource */
-                TempVariable = TaskPriority ;
-                while( ( OsTaskResourceAllocation[TempVariable] == FALSE ) && ( TempVariable != INVALID_TASK ) )
-                {
-                    TempVariable -- ;
-                }
-
-                if ( TempVariable == INVALID_TASK ) /* no task allocate resources */
-                {
-                    ReadyTaskPCB_Index = OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] ;
-                }
-                else if ( OsTaskResourceAllocation[TempVariable] > ReadyHighestPriority )  /* there's task was allocating resources and preempted */
-                {
-                    ReadyTaskPCB_Index = OsTasksPriority_Array [TempVariable] [ (OsTasksPriorityIndex_Array[TempVariable]) ] ;
-                }
-                else
-                {
-                    ReadyTaskPCB_Index = OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] ;
-                }
-
-            } /* if */
-            else    /* no ready tasks  */
-            {
-
-            } /* else */
-
-
-            if ( SUSPENDED == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_State ) /* task is terminated, done in CS because this lines need to done in atomic way */
-            {
-                /* release PCB of task in case of termination , this must done here right before calling dispatcher to terminate task
-                 * because if in TerminateTask i won't have access to PCB any more and task couldn't be preempted correctly along this function */
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID = INVALID_TASK ; /* make its PCB available */
-                NotSuspendedTasks_Number-- ;
-                RunningTaskPCB_Index = INVALID_TASK ;
-            }
-            else    /* task is waiting */
-            {
-
-            } /* else */
-
-        }  /* else */
+        /* modify highest priority in system and pcb index of task which will preempt running task */
+        ReadyHighestPriority = TaskPriority ;
+        ReadyTaskPCB_Index = PCB_Index ;
 
         DISPATCHER_CALL ;
+    }
+    else
+    {
+    }
+
+    return ;
+}
+
+/*****************************************************************************/
+
+/* used to add to head of proper priority queue and modify the queue */
+FUNC (void, OS_CODE) OsHeadTask ( uint8 PCB_Index )
+{
+    VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[PCB_Index].Task_Priority ;
+    VAR( uint8, AUTOMATIC ) TempVariable =    OsTasksPriorityIndex_Array[TaskPriority] - 1 ;
+
+    if ( 0xFF == TempVariable)
+    {
+        TempVariable = TASKS_PER_PRIORITY - 1 ;
+    }
+    else
+    {
+    }
+
+    OsTasksPriorityIndex_Array[TaskPriority] = TempVariable ;
+    OsTasksPriority_Array[ TaskPriority ][ TempVariable ] = PCB_Index ;
 
 
-    } /* else */
+    if( TaskPriority > ReadyHighestPriority )  /* if task priority is the highest in current system */
+    {
+        /* modify highest priority in system and pcb index of task which will preempt running task */
+        ReadyHighestPriority = TaskPriority ;
+
+    } /* if */
+    else
+    {
+
+    }
+
+    return ;
+}
+
+/*****************************************************************************/
+
+/* used to remove task from in the head of priority queue and modify the queue */
+FUNC (void, OS_CODE) RemoveTask ( uint8 TaskPriority )
+{
+
+    OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] = INVALID_TASK ;
+    OsTasksPriorityIndex_Array[TaskPriority] = ( OsTasksPriorityIndex_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
+
+
+    if ( ReadyHighestPriority > TaskPriority )  /* no need for CS, just read ReadyHighestPriority */ /* this case just happen in non preemptive tasks */
+    {
+
+    }
+    else
+    {
+
+        /* check for highest priority and if no there ready tasks then TaskPriority = INVALID_TASK */
+        while ( ( INVALID_TASK == OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] ) && ( INVALID_TASK != TaskPriority ) )
+        {
+            /* get highest priority in system */
+            TaskPriority-- ;
+        } /* while */
+
+        ReadyHighestPriority = TaskPriority ;
+
+        if ( INVALID_TASK != TaskPriority ) /* another task could enter running state */
+        {
+            ReadyTaskPCB_Index = OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] ;
+        }
+        else    /* no ready tasks  */
+        {
+
+        } /* else */
+
+    }
+
+    DISPATCHER_CALL ;
+
 
     return ;
 }
 
 
+/*****************************************************************************/
+
+/* this function used to initialize content of PCB related to hardware to achieve abstraction */
+FUNC (void, OS_CODE) Init_PCB ( uint8 PCB_Index, uint8 TaskID )
+{
+
+    /* initialize task PCB */
+    OsTasksPCB_Array[PCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[PCB_Index]).Task_Stack ) [TASK_STACK_SIZE] ) ) ;
+    OsTasksPCB_Array[PCB_Index].Task_LR = 0xFFFFFFFD ;
+    OsTasksPCB_Array[PCB_Index].Task_PSR = 0x01000000 ;
+    OsTasksPCB_Array[PCB_Index].Task_PC = OsTasksNames_Array[ TaskID ] ;
+    OsTasksPCB_Array[PCB_Index].Task_CONTROL = 0x01u ;
+    /* initialized because register 9 is used to hold temp of Linker register */
+    OsTasksPCB_Array[PCB_Index].Task_R9 = 0x00u ;
+
+    return ;
+}
+
 
 /*****************************************************************************/
+
+
 

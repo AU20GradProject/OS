@@ -37,7 +37,7 @@ typedef struct
 typedef struct
 {
     VAR( uint16, AUTOMATIC )     AutoStartTasks_Number ;                /* determine number of tasks to be activated  */
-    VAR( uint16, AUTOMATIC )     AutoStartTasks_Index ;                 /* determine index of first task to be activated in */
+    VAR( uint16, AUTOMATIC )     AutoStartTasks_Index ;                 /* determine index of first task to be activated in ,APPMODE_INVALID for no auto start tasks */
     VAR( uint16, AUTOMATIC )     AutoStartAlarms_Number ;               /* determine number of alarms to be activated */
     VAR( uint16, AUTOMATIC )     AutoStartAlarms_Index ;                /* determine index of first alarm to be activated in */
     VAR( uint16, AUTOMATIC )     AutoStartScheduleTables_Number ;       /* determine number of ScheduleTables to be activated */

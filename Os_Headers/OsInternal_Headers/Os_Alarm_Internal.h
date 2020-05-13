@@ -67,7 +67,7 @@ typedef struct
      * if = NOT_AUTOSTART then it won't be in autostart */
     VAR( uint8, AUTOMATIC ) OsAlarmAppModeRef ;
 
-    /* specifies the type of autostart for the alarm absolute or alarm */
+    /* specifies the type of autostart for the alarm absolute or relative */
     VAR( uint8, AUTOMATIC ) OsAlarmAutostartType ;
 
     /* relative or absolute tick value when the alarm expires for the first time.

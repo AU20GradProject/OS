@@ -35,24 +35,23 @@ CONST( OsAlarmAutostart, OS_CONFIG_DATA ) OsAutoStartAlarms_SettingArray [ AUTOS
 
 
 /* hold all ScheduleTables' IDs that will be activated in Auto start in all APP modes ordered by order of APP modes */
-CONST( ScheduleTableStatusType, OS_CONFIG_DATA ) OsAutoStartTabless_Array [ AUTOSTART_TABLESS_NUMBER ]  = OS_AUTOSTART_TABLES_OBJECT_CONGIFURATION ;
+CONST( ScheduleTableStatusType, OS_CONFIG_DATA ) OsAutoStartTabless_Array [ AUTOSTART_TABLES_NUMBER ]  = OS_AUTOSTART_TABLES_OBJECT_CONGIFURATION ;
 
 /* hold all tables' auto start settings  that will be activated in Auto start in all APP modes ordered by order of APP modes */
-CONST( OsScheduleTableAutostart, OS_CONFIG_DATA ) OsAutoStartTables_SettingArray [ AUTOSTART_TABLESS_NUMBER ]  = OS_AUTOSTART_SETTING_TABLES_OBJECT_CONGIFURATION ;
+CONST( OsScheduleTableAutostart, OS_CONFIG_DATA ) OsAutoStartTables_SettingArray [ AUTOSTART_TABLES_NUMBER ]  = OS_AUTOSTART_SETTING_TABLES_OBJECT_CONGIFURATION ;
 
 
 /* used to save app mode used inside system and passed to StartOS service */
 VAR( AppModeType, OS_CONFIG_DATA )  AppMode ;
 
 
-/* used to insure that nested critical section will be in right way */
-VAR ( uint16, OS_VAR_CLEARED) CriticalSection_Semaphore ;
+/**************************************************************************/
+
 
 /* used to take a copy of ReadyTaskPCB_Index inside dispatcher */
 VAR ( uint8, OS_VAR_CLEARED ) DispatcherLocal_Variable ;
 
-/* used to indicate privilege of running task */
-VAR ( uint8, OS_VAR_CLEARED ) OsTask_PrivilegeFlag ;
+
 
 /**************************************************************************/
 
@@ -82,10 +81,6 @@ VAR( uint8, OS_VAR_INIT) OsTasksPCB_Index_Array  [ TASKS_NUMBER ] = TASKS_PCB_IN
  * depending on it ReadyTaskPCB_Index will determined    */
 VAR ( uint8, OS_VAR_INIT ) ReadyHighestPriority = INVALID_TASK ;
 
-/* used to handle internal and standard resources
- * depending on it new tasks arriving ready queue will be determine if preempt running task or not*/
-VAR ( uint8, OS_VAR_INIT ) PreemptionPriority = INVALID_TASK ;
-
 
 /* carry PCB index of ready task that will preempt currently running task */
 VAR ( uint8, OS_VAR_INIT ) ReadyTaskPCB_Index = INVALID_TASK ;
@@ -93,14 +88,21 @@ VAR ( uint8, OS_VAR_INIT ) ReadyTaskPCB_Index = INVALID_TASK ;
 /* carry the PCB index of currently running task */
 VAR ( uint8, OS_VAR_INIT ) RunningTaskPCB_Index = INVALID_TASK ;
 
-/* used in context swithcing and preemption to easily modify value of stack frame */
+/* used in context switching and preemption to easily modify value of stack frame */
 volatile CONSTP2VAR ( OsStackFrame_MSP, OS_VAR_INIT, OS_APPL_CONST ) OsMSP_StackFrame_ptr = OS_MSP_STACK_FRAME_ADDRESS ;
 
-/* used in context swithcing and preemption to easily modify value of stack frame */
+/* used in context switching and preemption to easily modify value of stack frame */
 volatile P2VAR ( OsStackFrame_PSP, OS_VAR_CLEARED, OS_APPL_CONST ) OsPSP_StackFrame_ptr  ;
 
-
+/* used to check if there a place to activate new task*/
 VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
+
+/* used to indicate current policy used in scheduling for running task preemptive or not */
+VAR ( uint8, OS_VAR_INIT ) SchedulingPolicy =  TASK_NON ;
+
+/* used inside dispatcher to take a copy of task ceiling priority */
+VAR ( uint8, OS_VAR_CLEARED ) CeilingPriority  ;
+
 
 /**************************************************************************/
 
@@ -109,10 +111,8 @@ VAR ( uint8, OS_VAR_CLEARED ) NotSuspendedTasks_Number ;
 VAR( ISRType, OS_VAR_CLEARED ) IsrID = INVALID_ISR ;
 
 /* represent configuration data of every task */
-CONST( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] = OS_ISRS_OBJECT_CONGIFURATION ;
+VAR( OsIsr, OS_CONFIG_DATA ) OsIsr_Array [ ISRS_NUMBER ] = OS_ISRS_OBJECT_CONGIFURATION ;
 
-/* used to hold resource id of last resource occupied by isr */
-VAR ( ResourceType, OS_CONFIG_DATA ) OsIsr_LastResource [ ISRS_NUMBER ] = OS_ISRS_RESOURCES_OBJECT_CONGIFURATION ;
 
 /**************************************************************************/
 
@@ -122,19 +122,18 @@ VAR( HOOKType, OS_VAR_CLEARED ) HookID = INVALID_HOOK ;
 /**************************************************************************/
 
 /* used to define events configurations */
-CONST( EventMaskType, OS_CONFIG_DATA ) OsEvents_Array [ EVENTS_NUMBER ] = OS_EVENTS_OBJECT_CONGIFURATION ;
+CONST( EventMaskType, OS_CONFIG_DATA ) OsEvents_Array [ OS_EVENTS_NUMBER ] = OS_EVENTS_OBJECT_CONGIFURATION ;
 
 /**************************************************************************/
 
 /* define configurations of resources in system */
-CONST( OsResource, OS_CONFIG_DATA ) OsResource_Array [ RESOURCES_NUMBER ] = OS_RESOURCES_OBJECT_CONGIFURATION ;
+CONST( OsResource, OS_CONFIG_DATA ) OsResource_Array [ OS_RESOURCES_NUMBER ] = OS_RESOURCES_OBJECT_CONGIFURATION ;
 
 /* define array contain all resources PCBs with index of thier id */
-VAR( OsResource_PCB, OS_VAR_INIT) OsResourcePCB_Array [ RESOURCES_NUMBER ] = OS_RESOURCES_PCB_OBJECT_CONGIFURATION ;
+VAR( OsResource_PCB, OS_VAR_INIT) OsResourcePCB_Array [ OS_RESOURCES_NUMBER ] = OS_RESOURCES_PCB_OBJECT_CONGIFURATION ;
 
-/* define if the first task in priority queue allocate resource or not */
-VAR( uint8, OS_VAR_CLEARED ) OsTaskResourceAllocation [TASK_PRIORITIES_NUMBER] ;
-
+/* define array contain all resources PCBs with index of thier id */
+VAR( boolean, OS_VAR_INIT) OsResource_CS_Flag  = FALSE ;
 
 /**************************************************************************/
 
@@ -175,6 +174,22 @@ CONST( TaskType, OS_CONFIG_DATA ) ScheduleTableTaskSet_Array [ TABLES_EVENTS_SET
 
 /* define configuration of events to be set by tables in system */
 CONST( EventMaskType, OS_CONFIG_DATA ) ScheduleTableEventSet_Array [ TABLES_EVENTS_SET_NUMBER ] = OS_TABLESS_EVENTS_SET_OBJECT_CONGIFURATION ;
+
+/**************************************************************************/
+
+
+/* PEND status store variables used in Os_Isr */
+VAR(uint32, AUTOMATIC) PEND0;
+VAR(uint32, AUTOMATIC) PEND1;
+VAR(uint32, AUTOMATIC) PEND2;
+VAR(uint32, AUTOMATIC) PEND3;
+VAR(uint32, AUTOMATIC) PEND4;
+
+
+/* Variable contains the called interrupt disable function, if no function is called default value is NoDisableActive*/
+VAR(ActiveIsrDisableType, AUTOMATIC) ActiveIsrDisable;
+
+VAR(uint8, AUTOMATIC) suspendCount;
 
 /**************************************************************************/
 

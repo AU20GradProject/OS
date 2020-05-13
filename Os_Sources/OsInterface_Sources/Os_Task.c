@@ -56,29 +56,19 @@ FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID )
                 /* update pcb index of the task */
                 OsTasksPCB_Index_Array[TaskID] = LocalCounter ;
 
-
-                /* initialize task PCB */
+                /* initialize PCB */
+                OsTasksPCB_Array[LocalCounter].Task_State = READY ;
                 OsTasksPCB_Array[LocalCounter].Task_ID = TaskID ;
                 OsTasksPCB_Array[LocalCounter].Task_Priority = OsTasks_Array[TaskID].OsTaskPriority ;
                 OsTasksPCB_Array[LocalCounter].OsTaskMultipleActivation = 1 ;
-                OsTasksPCB_Array[LocalCounter].Task_ResourcesOccupied = 0 ;
-                OsTasksPCB_Array[LocalCounter].Task_LastResourceOccupied = NO_RESOURCE ;
-                OsTasksPCB_Array[LocalCounter].Task_State = READY ;
-                OsTasksPCB_Array[LocalCounter].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[LocalCounter]).Task_Stack ) [TASK_STACK_SIZE] ) ) ;
-                OsTasksPCB_Array[LocalCounter].Task_LR = 0xFFFFFFFD ;
-                OsTasksPCB_Array[LocalCounter].Task_PSR = 0x01000000 ;
-                OsTasksPCB_Array[LocalCounter].Task_PC = OsTasksNames_Array[TaskID] ;
-                OsTasksPCB_Array[LocalCounter].Task_CONTROL = 0x01u ;
-                OsTasksPCB_Array[LocalCounter].Task_R9 = 0x00u ;
-
+                Init_PCB( LocalCounter, TaskID ) ;
 
                 /* add new task's pcb index to proper priority queue*/
-                OsInternalScheduler ( LocalCounter, TRUE ) ;
+                OsTailTask ( LocalCounter ) ;
 
             }
             else
             {
-
                 /* system reach to maximum not suspended tasks */
                 ReturnResult = E_OS_LIMIT ;
 
@@ -90,18 +80,27 @@ FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID )
 
             LocalCounter = OsTasksPCB_Index_Array[TaskID] ; /* get task PCB index*/
 
-            /* critical section to read modify write OsTaskMultipleActivation */
-
-            if(  OsTasksPCB_Array[LocalCounter].OsTaskMultipleActivation <  OsTasks_Array[TaskID].OsTaskActivation  )
+            /* check if task is a basic task or not to allow multiple activation */
+            if ( OS_EVENT_BASIC_TASK != OsTasks_Array[ TaskID ].OsTaskEventRef )
             {
-                OsTasksPCB_Array[LocalCounter].OsTaskMultipleActivation ++ ;
+
+                /* critical section to read modify write OsTaskMultipleActivation */
+
+                if(  OsTasksPCB_Array[LocalCounter].OsTaskMultipleActivation <  OsTasks_Array[TaskID].OsTaskActivation  )
+                {
+                    OsTasksPCB_Array[LocalCounter].OsTaskMultipleActivation ++ ;
+                }
+                else
+                {
+                    /* task reach to maximum multiple activation request */
+                    ReturnResult = E_OS_LIMIT ;
+                }/* else */
             }
             else
             {
-                /* task reach to maximum multiple activation request */
+                /* task is basic task and can't have multiple activation */
                 ReturnResult = E_OS_LIMIT ;
-            }/* else */
-
+            } /* else*/
 
         }/* else */
 
@@ -119,7 +118,6 @@ FUNC (StatusType, OS_CODE) ActivateTask ( TaskType TaskID )
 }
 
 
-
 /*****************************************************************************/
 
 /* service causes the termination of the calling task. The calling task is transferred from the running state into the suspended state
@@ -135,63 +133,41 @@ FUNC (StatusType, OS_CODE) TerminateTask ( void )
     CS_ON ;
 
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
-    VAR( uint8, AUTOMATIC ) TaskPriority = OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ;
 
     if ( INVALID_ISR== IsrID)   /* check if called form ISR level */
     {
         /* no need to critical section because RunningTaskPCB_Index won't be corrupted by other task */
         if ( 0 == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ResourcesOccupied )
         {
-
             OsTasksPCB_Array[ RunningTaskPCB_Index ].OsTaskMultipleActivation -- ;
 
-            if ( OsTasksPCB_Array[ RunningTaskPCB_Index ].OsTaskMultipleActivation >= 1 ) /* task has multiple activation request */
+            if ( OsTasksPCB_Array[ RunningTaskPCB_Index ].OsTaskMultipleActivation > 0 ) /* task has multiple activation request */
             {
 
                 /* critical section to modify priority queue */
+                RemoveTask( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority  );
+                /* to release internal resource if exist */
+                OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority =  OsTasks_Array[ (OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority) ].OsTaskPriority ;
+                OsTailTask( RunningTaskPCB_Index );
 
-                /* remove PCB index from ready queue and shift first element in queue
-                 * done in critical section just before calling dispatcher, because if preempted
-                 * how will it return after pcb index in ready priority queue is removed */
-                OsTasksPriority_Array [TaskPriority] [ (OsTasksPriorityIndex_Array[TaskPriority]) ] = INVALID_TASK ;
-                OsTasksPriorityIndex_Array[TaskPriority] = ( OsTasksPriorityIndex_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
-
-                /* put Task PCB in ready queue*/
-                OsTasksPriority_Array[ TaskPriority][ ( OsTasksPriorityNext_Array[TaskPriority] ) ] = RunningTaskPCB_Index ;
-
-                /* allocation for resource ( empty place in ready queue ) */
-                OsTasksPriorityNext_Array[TaskPriority] = ( OsTasksPriorityNext_Array[TaskPriority] + 1 ) % TASKS_PER_PRIORITY ;
-
-                /* select next running pcb */
-                ReadyTaskPCB_Index = OsTasksPriority_Array [ReadyHighestPriority] [ (OsTasksPriorityIndex_Array[ReadyHighestPriority]) ] ;
-
-                /* initialize task PCB */
-
+                /* reinitialize task PCB */
                 OsTasksPCB_Array[RunningTaskPCB_Index].Task_State = READY ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_SP = ( VAR( uint32, AUTOMATIC ) ) ( &( ( (OsTasksPCB_Array[RunningTaskPCB_Index]).Task_Stack ) [TASK_STACK_SIZE] )) ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_LR = 0xFFFFFFFD ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_PSR = 0x01000000 ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_PC = OsTasksNames_Array[ (OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ] ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_CONTROL = 0x01u ;
-                OsTasksPCB_Array[RunningTaskPCB_Index].Task_R9 = 0x00u ;
-
-                /* release its internal resource */
-                OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = FALSE ;
-
-                RunningTaskPCB_Index = INVALID_TASK ;
-                DISPATCHER_CALL ;
-
-
+                Init_PCB(RunningTaskPCB_Index, (OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID ) ) ;
 
             }
             else
             {
                 OsTasksPCB_Index_Array [ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ID ) ] = INVALID_TASK ;    /* make task invisible to other tasks */
-                OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_State = SUSPENDED ;
+
                 /* remove task's pcb index from priority queue and call dispatcher and release PCB from task */
-                OsInternalScheduler ( RunningTaskPCB_Index, FALSE ) ;
+                RemoveTask ( (OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority) ) ;
+
+                OsTasksPCB_Array[RunningTaskPCB_Index].Task_ID = INVALID_TASK ; /* make its PCB available */
+                NotSuspendedTasks_Number-- ;
 
             } /* else */
+
+            RunningTaskPCB_Index = INVALID_TASK ;
 
         } /* if */
         else
@@ -264,6 +240,7 @@ FUNC (StatusType, OS_CODE) Schedule ( void )
 {
     CS_ON ;
 
+    /* need modify if no other task could preempt current running task */
 
     VAR( StatusType, AUTOMATIC ) ReturnResult = E_OK;
 
@@ -273,20 +250,34 @@ FUNC (StatusType, OS_CODE) Schedule ( void )
         if ( 0 == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_ResourcesOccupied )
         {
 
-            /* determine next running task's pcb and release internal resource */
-            ReadyTaskPCB_Index = OsTasksPriority_Array [ReadyHighestPriority] [ (OsTasksPriorityIndex_Array[ReadyHighestPriority]) ] ;
-            OsTaskResourceAllocation[ ( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority ) ] = FALSE ;
-            PreemptionPriority = FALSE ;
-            DISPATCHER_CALL ;
+            /* check if there task with higher priority is in ready state */
+            if( ReadyHighestPriority == OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority )
+            {
+                /* no higher priority task is ready, no need for scheduling  */
 
-        }
+            }
+            else
+            {
+                /* higher priority task is in ready queue */
+                /* determine next running task's pcb and release internal resource */
+                ReadyTaskPCB_Index = OsTasksPriority_Array [ReadyHighestPriority] [ (OsTasksPriorityIndex_Array[ReadyHighestPriority]) ] ;
+
+                /* critical section to modify priority queue */
+                RemoveTask( OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority  );
+                /* to release internal resource if exist */
+                OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority =  OsTasks_Array[ (OsTasksPCB_Array[ RunningTaskPCB_Index ].Task_Priority) ].OsTaskPriority ;
+                OsTailTask( RunningTaskPCB_Index );
+
+            } /* else */
+
+        } /* if */
         else
         {
             /* task still occupy resources */
             ReturnResult = E_OS_RESOURCE ;
         }
 
-    }
+    } /* if */
     else
     {
         /* called form interrupt */

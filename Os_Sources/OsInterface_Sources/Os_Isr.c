@@ -17,7 +17,8 @@
 #include "..\..\Os_Headers\OsInternal_Headers\Os_ExternalVariables.h"
 
 /* This service returns the identifier of the currently executing ISR.*/
-FUNC(ISRType, OS_CODE) GetISRID( void ){
+FUNC(ISRType, OS_CODE) GetISRID( void )
+{
     /*
     [SWS_Os_00263] If called from category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return the identifier of the currently executing ISR.
     [SWS_Os_00264] If its caller is not a category 2 ISR (or Hook routines called inside a category 2 ISR), GetISRID() shall return INVALID_ISR.
@@ -26,18 +27,21 @@ FUNC(ISRType, OS_CODE) GetISRID( void ){
 }
 
 /*This service restores the state saved by DisableAllInterrupts.*/
-FUNC(StatusType, OS_CODE) EnableAllInterrupts(void){
+FUNC(StatusType, OS_CODE) EnableAllInterrupts(void)
+{
     CS_ON;
     StatusType status = E_OK;
-/*
-* The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
-*/
-    if( HookID != INVALID_HOOK){
+
+    /* The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines. */
+
+
+    if( HookID != INVALID_HOOK)
+    {
         status = E_NOT_OK;
-    }else{ 
-    /*
-    * This service is a counterpart of DisableAllInterrupts service, which has to be called before, and its aim is the completion of the critical section of code.
-    */
+    }else
+    {
+
+    /* This service is a counterpart of DisableAllInterrupts service, which has to be called before, and its aim is the completion of the critical section of code. */
         if (ActiveIsrDisable != DisAllIntActive)
         {
             /* Error interrupts wasnot disabled using DisableAllInterrupts before enabling it*/
@@ -49,58 +53,72 @@ FUNC(StatusType, OS_CODE) EnableAllInterrupts(void){
         * The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service enables recognition of interrupts by the central processing unit.
         */
             ActiveIsrDisable = NoDisableActive; /* cannot be interrupted after because interrupt is disabled.*/
-    //    	__asm volatile (" CPSIE i");
+            __asm volatile (" CPSIE i");
         }
     }
+
     CS_OFF; /* disable critical section */
+
     return status;
 }
 
 /*This service disables all interrupts for which the hardware supports disabling. The state before is saved for the EnableAllInterrupts call.*/
-FUNC(StatusType, OS_CODE) DisableAllInterrupts(void){
+FUNC(StatusType, OS_CODE) DisableAllInterrupts(void)
+{
     CS_ON;
     StatusType status = E_OK;
     
     /*
     The service may be called from an ISR category 1 and category 2 and from the task level, but not from hook routines.
     */
-    if( HookID != INVALID_HOOK){
+    if( HookID != INVALID_HOOK)
+    {
         status = E_NOT_OK;
         CS_OFF;
     /*
     This service is intended to start a critical section of the code. This section shall be finished by calling the EnableAllInterrupts service. No API service calls are allowed within this critical section.
     */
-    }else{ 
-        if (ActiveIsrDisable != NoDisableActive){
+    }
+    else
+    {
+        if (ActiveIsrDisable != NoDisableActive)
+        {
             /* Error nesting is not supported*/
             status = E_NOT_OK;
             CS_OFF;
-        }else{
+        }
+        else
+        {
             /*
             The implementation should adapt this service to the target hardware providing a minimum overhead. Usually, this service disables recognition of interrupts by the central processing unit.
             Note that this service does not support nesting. If nesting is needed for critical sections e.g. for libraries SuspendOSInterrupts/ResumeOSInterrupts or SuspendAllInterrupt/ResumeAllInterrupts should be used.
             */
-    //    	__asm volatile (" CPSID i");
+        	__asm volatile (" CPSID i");
             ActiveIsrDisable = DisAllIntActive; /* cannot be interrupted before because interrupt is disabled. */
         }
     }
+
     END_PRIVILEGE;
     return status;
 }
 /* The rest of the functions werenot implemented because we donot need them */
 
 /* This service restores the recognition status of all interrupts saved by the SuspendAllInterrupts service. */
-FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void){
+FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void)
+{
     CS_ON;
     StatusType status = E_OK;
 
     /*
     The service may be called from an ISR category 1 and category 2, from alarm-callbacks and from the task level, but not from all hook routines.
     */
-    if( HookID != INVALID_HOOK){
+    if( HookID != INVALID_HOOK)
+    {
         status = E_NOT_OK;
         CS_OFF;
-    }else{
+    }
+    else
+    {
         /*
         This service is the counterpart of SuspendAllInterrupts service, which has to have been called before, and its aim is the completion of the critical section of code. No API service calls beside SuspendAllInterrupts/ResumeAllInterrupts pairs and SuspendOSInterrupts/ResumeOSInterrupts pairs are allowed within this critical section.
         */
@@ -108,10 +126,13 @@ FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void){
         The implementation should adapt this service to the target hardware providing a minimum overhead.
         SuspendAllInterrupts/ResumeAllInterrupts can be nested. In case of nesting pairs of the calls SuspendAllInterrupts and ResumeAllInterrupts the interrupt recognition status saved by the first call of SuspendAllInterrupts is restored by the last call of the ResumeAllInterrupts service.
         */
-        if (ActiveIsrDisable != SuspendAllIntActive && ActiveIsrDisable != SuspendOSIntActive){
+        if (ActiveIsrDisable != SuspendAllIntActive && ActiveIsrDisable != SuspendOSIntActive)
+        {
             /* Error interrupts wasnot suspended before resuming them*/
             status = E_NOT_OK;
-        }else {
+        }
+        else
+        {
             PEND0_REG_ADDR = PEND0;
             PEND1_REG_ADDR = PEND1;
             PEND2_REG_ADDR = PEND2;
@@ -122,10 +143,12 @@ FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void){
             UNPEND2_REG_ADDR = ~PEND2;
             UNPEND3_REG_ADDR = ~PEND3;
             UNPEND4_REG_ADDR = ~PEND4;
-            if ( 0 == --suspendCount){      
+            if ( 0 == --suspendCount)
+            {
                 ActiveIsrDisable = NoDisableActive;  
                 CS_OFF;
-            }else {
+            }else
+            {
                 ActiveIsrDisable = SuspendAllIntActive;  
             }
         }
@@ -135,7 +158,8 @@ FUNC(StatusType, OS_CODE) ResumeAllInterrupts(void){
 }
 
 /*This service saves the recognition status of all interrupts and disables all interrupts for which the hardware supports disabling.*/
-FUNC(StatusType, OS_CODE) SuspendAllInterrupts(void){
+FUNC(StatusType, OS_CODE) SuspendAllInterrupts(void)
+        {
     CS_ON;
     StatusType status = E_OK;
     /*
@@ -171,17 +195,22 @@ FUNC(StatusType, OS_CODE) SuspendAllInterrupts(void){
     END_PRIVILEGE;
     return status;
 }
+
+
 /*This service restores the recognition status of interrupts saved by the SuspendOSInterrupts service.*/
-FUNC(StatusType, OS_CODE) ResumeOSInterrupts(void){
+FUNC(StatusType, OS_CODE) ResumeOSInterrupts(void)
+{
     CS_ON;
     StatusType status = E_OK;
     /*
     The service may be called from an ISR category 1 and category 2, from alarm-callbacks and from the task level, but not from all hook routines.
     */
-    if( HookID != INVALID_HOOK){
+    if( HookID != INVALID_HOOK)
+    {
         status = E_NOT_OK;
         CS_OFF;
-    }else{
+    }else
+    {
         /*
         This service is the counterpart of SuspendAllInterrupts service, which has to have been called before, and its aim is the completion of the critical section of code. No API service calls beside SuspendAllInterrupts/ResumeAllInterrupts pairs and SuspendOSInterrupts/ResumeOSInterrupts pairs are allowed within this critical section.
         */
@@ -204,10 +233,13 @@ FUNC(StatusType, OS_CODE) ResumeOSInterrupts(void){
             UNPEND3_REG_ADDR = ~PEND3;
             UNPEND4_REG_ADDR = ~PEND4;
 
-            if ( 0 == --suspendCount){      
+            if ( 0 == --suspendCount)
+            {
                 ActiveIsrDisable = NoDisableActive;  
                 CS_OFF;
-            }else {
+            }
+            else
+            {
                 ActiveIsrDisable = SuspendOSIntActive;  
             }
         }

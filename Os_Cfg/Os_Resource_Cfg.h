@@ -18,25 +18,26 @@
 #define RESOURCE_STANDARD    0x44u
 
 
-#define RESORCE_0   0
 
-#define RESORCE_1   1
 
-#define RESORCE_2   2
+#define OS_RESOURCES_NUMBER   5u
 
-#define RESORCE_3   3
-
-#define RESORCE_4   4
-
-#define RESORCE_5   5
-
+#define OS_NO_RESOURCE_MASK     0x00000000u
+#define OS_RESORCE_0_MASK       0x00000001u
+#define OS_RESORCE_1_MASK       0x00000002u
+#define OS_RESORCE_2_MASK       0x00000004u
+#define OS_RESORCE_3_MASK       0x00000008u
+#define OS_RESORCE_4_MASK       0x00000010u
 
 
 
+#define OS_RESOURCE_0       0u
+#define OS_RESOURCE_1       1u
+#define OS_RESOURCE_2       2u
+#define OS_RESOURCE_3       3u
+#define OS_RESOURCE_4       4u
+#define OS_NO_RESOURCE      0xFFu
 
-#define NO_RESOURCE         0xFFu
-
-#define RESOURCES_NUMBER    6
 
 
 
@@ -45,7 +46,7 @@
     {\
         .OsResourceProperty = RESOURCE_INTERNAL \
         ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE\
+        .OsResourceLinkedResourceRef = OS_NO_RESOURCE\
         ,\
         .OsResourcePriority = 0x04u \
     }\
@@ -53,7 +54,7 @@
     {\
         .OsResourceProperty =  RESOURCE_STANDARD  \
         ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
+        .OsResourceLinkedResourceRef = OS_NO_RESOURCE \
         ,\
         .OsResourcePriority = 0x08u \
     }\
@@ -61,7 +62,7 @@
     {\
         .OsResourceProperty =  RESOURCE_STANDARD  \
         ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
+        .OsResourceLinkedResourceRef = OS_NO_RESOURCE \
         ,\
         .OsResourcePriority = 0x07u \
     }\
@@ -69,7 +70,7 @@
     {\
         .OsResourceProperty =  RESOURCE_STANDARD  \
         ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
+        .OsResourceLinkedResourceRef = OS_NO_RESOURCE \
         ,\
         .OsResourcePriority = 0x06u \
     }\
@@ -77,15 +78,7 @@
     {\
         .OsResourceProperty =  RESOURCE_STANDARD  \
         ,\
-        .OsResourceLinkedResourceRef = NO_RESOURCE \
-        ,\
-        .OsResourcePriority = 0x05u \
-    }\
-    ,\
-    {\
-        .OsResourceProperty = RESOURCE_LINKED \
-        ,\
-        .OsResourceLinkedResourceRef = RESORCE_5 \
+        .OsResourceLinkedResourceRef = OS_NO_RESOURCE \
         ,\
         .OsResourcePriority = 0x05u \
     }\

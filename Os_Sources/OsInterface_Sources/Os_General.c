@@ -32,108 +32,117 @@ FUNC (void, OS_CODE) StartOS ( AppModeType Mode )
     VAR ( uint16, AUTOMATIC ) LocalCounter = 0 ;
 
     /* all interrupt must be disabled before calling StartOS */
+    CS_ON ;
 
-    /* tasks  auto starting */
-
-    LocalCounter = OsAppModes_Array [Mode].AutoStartTasks_Index  ;
-    if ( APPMODE_INVALID != LocalCounter )
+    /* check if application mode has auto start tasks, alarms or scheduling tables*/
+    if( NOT_AUTOSTART == Mode )
     {
-
-        /* determine stop index of tasks which will be activated by for loop */
-        LocalTemp = OsAppModes_Array [Mode].AutoStartTasks_Index + OsAppModes_Array [Mode].AutoStartTasks_Number ;
-
-        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
+        /* tasks  auto starting */
+        LocalCounter = OsAppModes_Array [Mode].AutoStartTasks_Index  ;
+        if ( APPMODE_INVALID != LocalCounter )
         {
-            ActivateTask( OsAutoStartTasks_Array[LocalCounter] ) ;
 
-        } /* for */
+            /* determine stop index of tasks which will be activated by for loop */
+            LocalTemp = OsAppModes_Array [Mode].AutoStartTasks_Index + OsAppModes_Array [Mode].AutoStartTasks_Number ;
+
+            for( ; LocalCounter < LocalTemp ; LocalCounter++ )
+            {
+                ActivateTask( OsAutoStartTasks_Array[LocalCounter] ) ;
+
+            } /* for */
+        }
+        else
+        {
+            /* this app mode hasn't auto start tasks */
+        }
+
+
+        /************************************************************************/
+
+
+        /* alarms auto starting */
+        LocalCounter = OsAppModes_Array [Mode].AutoStartAlarms_Index  ;
+
+        if ( APPMODE_INVALID != LocalCounter )
+        {
+            /* determine stop index of alarms which will be activated by for loop */
+            LocalTemp = OsAppModes_Array [Mode].AutoStartAlarms_Index + OsAppModes_Array [Mode].AutoStartAlarms_Number ;
+
+            for( ; LocalCounter < LocalTemp ; LocalCounter++ )
+            {
+                if( ALARM_ABSOLUTE == OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAutostartType )
+                {
+                    /*
+                    SetAbsAlarm( OsAutoStartAlarms_Array[LocalCounter], OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAlarmTime , OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmCycleTime );
+                    */
+
+                }
+                else
+                {
+                    /*
+                    SetRelAlarm( OsAutoStartAlarms_Array[LocalCounter], OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAlarmTime , OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmCycleTime );
+                    */
+
+                } /* else */
+
+            }  /* for*/
+
+        } /* if */
+        else
+        {
+            /* this app mode hasn't auto start tasks */
+        }
+
+
+        /************************************************************************/
+
+
+        /* schedule tables auto starting */
+        LocalCounter = OsAppModes_Array [Mode].AutoStartScheduleTables_Index  ;
+
+        if ( APPMODE_INVALID != LocalCounter )
+        {
+            /* determine stop index of schedule tables which will be activated by for loop */
+            LocalTemp = OsAppModes_Array [Mode].AutoStartScheduleTables_Index + OsAppModes_Array [Mode].AutoStartScheduleTables_Number ;
+
+            for( ; LocalCounter < LocalTemp ; LocalCounter++ )
+            {
+
+                if( TABLE_ABSOLUTE == OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableAutostartType )
+                {
+                    /*
+                    StartScheduleTableAbs( OsAutoStartTabless_Array[LocalCounter] , OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableStartValue ) ;
+                    */
+
+                }
+                else
+                {
+                    /*
+                    StartScheduleTableRel( OsAutoStartTabless_Array[LocalCounter] , OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableStartValue ) ;
+                    */
+
+                } /* else */
+
+            } /* for */
+
+        } /* if */
+        else
+        {
+            /* this app mode hasn't auto start tasks */
+        }
+
+
     }
     else
     {
-        /* this app mode hasn't auto start tasks */
+        /* application don't has any auto start to do */
     }
-
-
-    /************************************************************************/
-
-
-    /* alarms auto starting */
-    LocalCounter = OsAppModes_Array [Mode].AutoStartAlarms_Index  ;
-
-    if ( APPMODE_INVALID != LocalCounter )
-    {
-        /* determine stop index of alarms which will be activated by for loop */
-        LocalTemp = OsAppModes_Array [Mode].AutoStartAlarms_Index + OsAppModes_Array [Mode].AutoStartAlarms_Number ;
-
-        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
-        {
-            if( ALARM_ABSOLUTE == OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAutostartType )
-            {
-                /*
-                SetAbsAlarm( OsAutoStartAlarms_Array[LocalCounter], OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAlarmTime , OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmCycleTime );
-                */
-
-            }
-            else
-            {
-                /*
-                SetRelAlarm( OsAutoStartAlarms_Array[LocalCounter], OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmAlarmTime , OsAutoStartAlarms_SettingArray[LocalCounter].OsAlarmCycleTime );
-                */
-
-            } /* else */
-
-        }  /* for*/
-
-    } /* if */
-    else
-    {
-        /* this app mode hasn't auto start tasks */
-    }
-
-
-    /************************************************************************/
-
-
-    /* schedule tables auto starting */
-    LocalCounter = OsAppModes_Array [Mode].AutoStartScheduleTables_Index  ;
-
-    if ( APPMODE_INVALID != LocalCounter )
-    {
-        /* determine stop index of schedule tables which will be activated by for loop */
-        LocalTemp = OsAppModes_Array [Mode].AutoStartScheduleTables_Index + OsAppModes_Array [Mode].AutoStartScheduleTables_Number ;
-
-        for( ; LocalCounter < LocalTemp ; LocalCounter++ )
-        {
-
-            if( TABLE_ABSOLUTE == OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableAutostartType )
-            {
-                /*
-                StartScheduleTableAbs( OsAutoStartTabless_Array[LocalCounter] , OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableStartValue ) ;
-                */
-
-            }
-            else
-            {
-                /*
-                StartScheduleTableRel( OsAutoStartTabless_Array[LocalCounter] , OsAutoStartTables_SettingArray[LocalCounter].OsScheduleTableStartValue ) ;
-                */
-
-            } /* else */
-
-        } /* for */
-
-    } /* if */
-    else
-    {
-        /* this app mode hasn't auto start tasks */
-    }
-
-    /************************************************************************/
-
 
     CS_OFF ;
 
-    return ;
+
+    /* StartOS function mustn't return so if no auto start task it will enter idle loop till task activation happen */
+    while(1);
 }
 
 /********************************************************************************************/
