@@ -13,7 +13,7 @@
 #define OS_CFG_OS_COUNTER_CFG_H_
 
 
-#define COUNTERS_NUMBER 2
+#define COUNTERS_NUMBER 1
 
 
 #define COUNTER_1       0
@@ -31,17 +31,7 @@
     ,\
     .OsCounterTicksPerBase = 1u \
     ,\
-    .OsCounterMaxAllowedValue = 90000u \
-    ,\
-    .OsCounterMinCycle = 0u \
-    }\
-    ,\
-    {\
-    .OsCounterType = COUNTER_SOFTWARE \
-    ,\
-    .OsCounterTicksPerBase = 1u \
-    ,\
-    .OsCounterMaxAllowedValue = 1000u \
+    .OsCounterMaxAllowedValue = 10000u \
     ,\
     .OsCounterMinCycle = 0u \
     }\
